@@ -13,8 +13,16 @@ type Projeto = { id:number; nome:string; provas:Prova[] };
 
 // ─── Cores ───────────────────────────────────────────────────────────────────
 const C = {
-  vd:"#14532D", vm:"#16A34A", bg:"#F0FDF4", borda:"#BBF7D0", card:"#DCFCE7",
-  branco:"#fff", erro:"#DC2626", erroBg:"#FEF2F2", aviso:"#D97706", avisoBg:"#FFFBEB",
+  vd:"#1a3d00",        // verde escuro — texto principal
+  vm:"#4a8a00",        // verde médio — destaques
+  bg:"#f4f9ef",        // fundo geral verde muito claro
+  borda:"#b8d98a",     // bordas verdes claras
+  card:"#e8f4d8",      // fundo de cards
+  branco:"#ffffff",    // branco puro
+  erro:"#cc2200",      // erro
+  erroBg:"#fff0ee",    // fundo erro
+  aviso:"#3a7a00",     // aviso
+  avisoBg:"#f0f9e0",   // fundo aviso
 };
 
 // ─── API ─────────────────────────────────────────────────────────────────────
@@ -134,27 +142,32 @@ function parseQs(txt:string): Omit<Questao,"id"|"aprovada"|"diagnostico">[] {
 
 // ─── Helpers visuais ─────────────────────────────────────────────────────────
 const s = {
-  inp: { width:"100%", background:C.bg, border:"1.5px solid "+C.borda, borderLeft:"4px solid "+C.vm, borderRadius:"6px", padding:".5rem .7rem", fontSize:".88rem", color:C.vd, fontWeight:600, outline:"none", boxSizing:"border-box" as const, fontFamily:"inherit" },
-  lbl: { display:"block", fontSize:".78rem", fontWeight:700, color:C.vd, marginBottom:".25rem" } as React.CSSProperties,
-  card: { background:C.branco, border:"1.5px solid "+C.borda, borderRadius:"10px", padding:"1rem 1.2rem", marginBottom:"1rem", boxShadow:"0 2px 12px rgba(20,83,45,.10)" },
-  secT: { fontSize:".82rem", fontWeight:700, color:C.vd, background:C.card, borderLeft:"3px solid "+C.vm, padding:".35rem .9rem", borderRadius:"6px", marginBottom:".9rem", display:"flex", alignItems:"center", gap:".4rem" } as React.CSSProperties,
-  bp: { background:"linear-gradient(135deg,#14532D,#16A34A)", color:"#fff", border:"none", borderRadius:"7px", padding:".5rem 1.2rem", fontWeight:700, cursor:"pointer", fontSize:".84rem", display:"inline-flex", alignItems:"center", gap:".35rem" } as React.CSSProperties,
-  bs: { background:C.bg, color:C.vd, border:"1.5px solid "+C.vm, borderRadius:"7px", padding:".4rem .9rem", fontWeight:700, cursor:"pointer", fontSize:".80rem" } as React.CSSProperties,
-  bd: { background:C.erroBg, color:C.erro, border:"1.5px solid #FECACA", borderRadius:"7px", padding:".4rem .9rem", fontWeight:700, cursor:"pointer", fontSize:".80rem" } as React.CSSProperties,
-  bxs: { background:C.bg, color:C.vd, border:"1.5px solid "+C.vm, borderRadius:"6px", padding:".2rem .55rem", fontWeight:700, cursor:"pointer", fontSize:".72rem" } as React.CSSProperties,
-  bdxs: { background:C.erroBg, color:C.erro, border:"1.5px solid #FECACA", borderRadius:"6px", padding:".2rem .55rem", fontWeight:700, cursor:"pointer", fontSize:".72rem" } as React.CSSProperties,
+  inp: { width:"100%", background:"#fff", border:"1.5px solid #b8d98a", borderLeft:"4px solid #4a8a00", borderRadius:"6px", padding:".5rem .7rem", fontSize:".88rem", color:"#1a3d00", fontWeight:600, outline:"none", boxSizing:"border-box" as const, fontFamily:"inherit" },
+  lbl: { display:"block", fontSize:".78rem", fontWeight:700, color:"#1a3d00", marginBottom:".25rem" } as React.CSSProperties,
+  card: { background:"#fff", border:"1px solid #b8d98a", borderRadius:"8px", padding:"1rem 1.2rem", marginBottom:"1rem", boxShadow:"0 2px 10px rgba(60,120,0,0.08)" },
+  secT: { fontSize:".82rem", fontWeight:700, color:"#1a3d00", background:"#e8f4d8", borderLeft:"3px solid #4a8a00", padding:".35rem .9rem", borderRadius:"6px", marginBottom:".9rem", display:"flex", alignItems:"center", gap:".4rem", letterSpacing:".04em" } as React.CSSProperties,
+  bp: { background:"linear-gradient(135deg,#1a4a00,#4a8a00)", color:"#CCFF33", border:"none", borderRadius:"6px", padding:".5rem 1.2rem", fontWeight:700, cursor:"pointer", fontSize:".84rem", display:"inline-flex", alignItems:"center", gap:".35rem" } as React.CSSProperties,
+  bs: { background:"#f4f9ef", color:"#1a3d00", border:"1.5px solid #4a8a00", borderRadius:"6px", padding:".4rem .9rem", fontWeight:700, cursor:"pointer", fontSize:".80rem" } as React.CSSProperties,
+  bd: { background:"#fff0ee", color:"#cc2200", border:"1.5px solid #ffaaaa", borderRadius:"6px", padding:".4rem .9rem", fontWeight:700, cursor:"pointer", fontSize:".80rem" } as React.CSSProperties,
+  bxs: { background:"#f4f9ef", color:"#1a3d00", border:"1px solid #4a8a00", borderRadius:"5px", padding:".2rem .55rem", fontWeight:700, cursor:"pointer", fontSize:".72rem" } as React.CSSProperties,
+  bdxs: { background:"#fff0ee", color:"#cc2200", border:"1px solid #ffaaaa", borderRadius:"5px", padding:".2rem .55rem", fontWeight:700, cursor:"pointer", fontSize:".72rem" } as React.CSSProperties,
 };
 
 function Tag({ children }:{ children:React.ReactNode }) {
-  return <span style={{ background:C.card, color:C.vd, borderRadius:"99px", padding:"1px 8px", fontSize:".72rem", fontWeight:700, marginLeft:"4px" }}>{children}</span>;
+  return <span style={{ background:"#e8f4d8", color:"#1a3d00", borderRadius:"99px", padding:"1px 8px", fontSize:".72rem", fontWeight:700, marginLeft:"4px", border:"1px solid #b8d98a" }}>{children}</span>;
 }
 function Alert({ type="in", children }:{ type?:"in"|"ok"|"er"|"av"; children:React.ReactNode }) {
-  const map = { in:{ background:"#EFF6FF", color:"#1D4ED8", borderLeft:"4px solid #3B82F6" }, ok:{ background:C.card, color:C.vd, borderLeft:"4px solid "+C.vm }, er:{ background:C.erroBg, color:C.erro, borderLeft:"4px solid "+C.erro }, av:{ background:C.avisoBg, color:C.aviso, borderLeft:"4px solid "+C.aviso } };
-  return <div style={{ borderRadius:"7px", padding:".6rem .9rem", fontSize:".83rem", marginBottom:".8rem", fontWeight:500, ...map[type] }}>{children}</div>;
+  const map = {
+    in:  { background:"#eef6ff", color:"#1a3a7a", borderLeft:"4px solid #4a7acc" },
+    ok:  { background:"#e8f4d8", color:"#1a3d00", borderLeft:"4px solid #4a8a00" },
+    er:  { background:"#fff0ee", color:"#cc2200", borderLeft:"4px solid #cc2200" },
+    av:  { background:"#f0f9e0", color:"#1a3d00", borderLeft:"4px solid #4a8a00" },
+  };
+  return <div style={{ borderRadius:"6px", padding:".6rem .9rem", fontSize:".83rem", marginBottom:".8rem", fontWeight:500, ...map[type] }}>{children}</div>;
 }
 function SecTitle({ children }:{ children:React.ReactNode }) { return <div style={s.secT}>{children}</div>; }
 function Spinner() { return <span className="spinner" />; }
-function HR() { return <hr style={{ border:"none", borderTop:"1px solid "+C.borda, margin:".9rem 0" }} />; }
+function HR() { return <hr style={{ border:"none", borderTop:"1px solid #b8d98a", margin:".9rem 0" }} />; }
 
 // ─── DifGrid ─────────────────────────────────────────────────────────────────
 function DifGrid({ dif, onChange }:{ dif:Dif; onChange:(d:Dif)=>void }) {
@@ -181,7 +194,7 @@ function DifGrid({ dif, onChange }:{ dif:Dif; onChange:(d:Dif)=>void }) {
 function ConteudoRow({ c, onChange, onRemove }:{ c:Conteudo; onChange:(c:Conteudo)=>void; onRemove:()=>void }) {
   const [showTB, setShowTB] = useState(false);
   return (
-    <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1.2fr auto", gap:".5rem", alignItems:"end", background:C.bg, border:"1px solid "+C.borda, borderRadius:"8px", padding:".6rem .8rem", marginBottom:".5rem" }}>
+    <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1.2fr auto", gap:".5rem", alignItems:"end", background:"#f4f9ef", border:"1px solid #b8d98a", borderRadius:"6px", padding:".6rem .8rem", marginBottom:".5rem" }}>
       <div><label style={s.lbl}>Conteúdo / Disciplina</label><input style={s.inp} value={c.nome} onChange={e=>onChange({...c,nome:e.target.value})} placeholder="Ex: Direito Constitucional"/></div>
       <div><label style={s.lbl}>Qtd</label><input type="number" style={{...s.inp,maxWidth:"80px",textAlign:"center"}} value={c.qtd} min={1} max={20} onChange={e=>onChange({...c,qtd:parseInt(e.target.value)||1})}/></div>
       <div><label style={s.lbl}>Tipo</label>
@@ -206,9 +219,9 @@ function ConteudoRow({ c, onChange, onRemove }:{ c:Conteudo; onChange:(c:Conteud
 // ─── Modal ───────────────────────────────────────────────────────────────────
 function Modal({ title, onClose, children }:{ title:string; onClose?:()=>void; children:React.ReactNode }) {
   return (
-    <div onClick={e=>{ if(e.target===e.currentTarget&&onClose) onClose(); }} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.45)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }}>
-      <div style={{ background:"#fff", borderRadius:"14px", width:"100%", maxWidth:"760px", maxHeight:"90vh", overflowY:"auto", boxShadow:"0 8px 40px rgba(0,0,0,.25)" }}>
-        <div style={{ background:"linear-gradient(135deg,#14532D,#15803D)", padding:".9rem 1.2rem", borderRadius:"14px 14px 0 0", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, zIndex:1 }}>
+    <div onClick={e=>{ if(e.target===e.currentTarget&&onClose) onClose(); }} style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }}>
+      <div style={{ background:"#fff", borderRadius:"10px", border:"1px solid #b8d98a", width:"100%", maxWidth:"760px", maxHeight:"90vh", overflowY:"auto", boxShadow:"0 8px 40px rgba(0,0,0,.25)" }}>
+        <div style={{ background:"linear-gradient(135deg,#000,#0d2a05)", padding:".9rem 1.2rem", borderRadius:"10px 10px 0 0", borderBottom:"1px solid #2a5a00", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, zIndex:1 }}>
           <span style={{ color:"#fff", fontWeight:700, fontSize:".95rem" }}>{title}</span>
           {onClose && <button onClick={onClose} style={{ background:"none", border:"none", color:"#86EFAC", fontSize:"1.3rem", cursor:"pointer" }}>✕</button>}
         </div>
@@ -333,8 +346,8 @@ function GerarModal({ prova, onGeradas, onClose }:{ prova:Prova; onGeradas:(qs:Q
       {erro && <Alert type="er">{erro}</Alert>}
       {(gerando||pct>0) && (
         <div style={{ marginBottom:"1rem" }}>
-          <div style={{ background:C.borda, borderRadius:"99px", height:"8px", overflow:"hidden", margin:".5rem 0" }}>
-            <div style={{ height:"100%", background:C.vm, borderRadius:"99px", width:pct+"%", transition:"width .4s" }}/>
+          <div style={{ background:"#e8f4d8", border:"1px solid #b8d98a", borderRadius:"99px", height:"8px", overflow:"hidden", margin:".5rem 0" }}>
+            <div style={{ height:"100%", background:"linear-gradient(90deg,#1a4a00,#4a8a00)", borderRadius:"99px", width:pct+"%", transition:"width .4s" }}/>
           </div>
           <div style={{ fontSize:".78rem", color:"#166534" }}>{status}</div>
         </div>
@@ -362,10 +375,10 @@ function QuestaoCard({ q, cfg, onUpdate, onRemove }:{ q:Questao; cfg:Config; onU
   const lbl = `Questão ${q.numero} — ${q.conteudo} ${rcEmoji[rc||""]||""}`;
 
   const RiscoBadge = () => {
-    if(q.aprovada) return <span style={{ background:"#4ADE80", color:"#14532D", borderRadius:"20px", padding:".12rem .5rem", fontSize:".68rem", fontWeight:700 }}>✓ Aprovada</span>;
-    const map:{[k:string]:[string,string]} = { GRAVE:["#FCA5A5","#7F1D1D"], MODERADO:["#FDE68A","#92400E"], LEVE:["#A7F3D0","#065F46"], INEXISTENTE:["#D1FAE5","#065F46"] };
-    if(!rc) return <span style={{ background:"#FDE68A", color:"#92400E", borderRadius:"20px", padding:".12rem .5rem", fontSize:".68rem", fontWeight:700 }}>Pendente</span>;
-    const [bg,col] = map[rc]||["#FDE68A","#92400E"];
+    if(q.aprovada) return <span style={{ background:"#e8f4d8", color:"#1a3d00", borderRadius:"20px", padding:".12rem .5rem", fontSize:".68rem", fontWeight:700, border:"1px solid #4a8a00" }}>Aprovada</span>;
+    const map:{[k:string]:[string,string]} = { GRAVE:["#fff0ee","#cc2200"], MODERADO:["#fffbe0","#6b4a00"], LEVE:["#eef8e0","#2a5a00"], INEXISTENTE:["#e8f4d8","#1a3d00"] };
+    if(!rc) return <span style={{ background:"#fffbe0", color:"#6b4a00", borderRadius:"20px", padding:".12rem .5rem", fontSize:".68rem", fontWeight:700, border:"1px solid #e0cc60" }}>Pendente</span>;
+    const [bg,col] = map[rc]||["#fffbe0","#6b4a00"];
     return <span style={{ background:bg, color:col, borderRadius:"20px", padding:".12rem .5rem", fontSize:".68rem", fontWeight:700 }}>{rc}</span>;
   };
 
@@ -411,15 +424,15 @@ function QuestaoCard({ q, cfg, onUpdate, onRemove }:{ q:Questao; cfg:Config; onU
   };
 
   const rcMap:{[k:string]:React.CSSProperties} = {
-    INEXISTENTE:{ background:"#D1FAE5", color:"#065F46", border:"1px solid #6EE7B7" },
-    LEVE:{ background:"#ECFDF5", color:"#065F46", border:"1px solid #A7F3D0" },
-    MODERADO:{ background:C.avisoBg, color:C.aviso, border:"1px solid #FDE68A" },
-    GRAVE:{ background:C.erroBg, color:C.erro, border:"1px solid #FECACA" },
+    INEXISTENTE:{ background:"#e8f4d8", color:"#1a3d00", border:"1px solid #b8d98a" },
+    LEVE:{ background:"#eef8e0", color:"#2a5a00", border:"1px solid #a0cc60" },
+    MODERADO:{ background:"#fffbe0", color:"#6b4a00", border:"1px solid #e0cc60" },
+    GRAVE:{ background:"#fff0ee", color:"#cc2200", border:"1px solid #ffaaaa" },
   };
 
   return (
-    <div style={{ border:"1.5px solid "+C.vm, borderRadius:"8px", marginBottom:".7rem", overflow:"hidden", boxShadow:"0 1px 6px rgba(20,83,45,.07)" }}>
-      <div onClick={()=>setOpen(p=>!p)} style={{ background:"linear-gradient(90deg,#14532D,#166534 30%,#15803D)", padding:".45rem .9rem", display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer" }}>
+    <div style={{ border:"1px solid #b8d98a", borderRadius:"8px", marginBottom:".7rem", overflow:"hidden", boxShadow:"0 2px 8px rgba(60,120,0,0.10)" }}>
+      <div onClick={()=>setOpen(p=>!p)} style={{ background:"linear-gradient(90deg,#000,#0a2500 40%,#0d3000)", padding:".45rem .9rem", borderBottom:"1px solid #2a5a00", display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer" }}>
         <span style={{ color:"#fff", fontWeight:700, fontSize:".82rem" }}>{lbl}</span>
         <div style={{ display:"flex", gap:".4rem", alignItems:"center" }}><RiscoBadge/><span style={{ color:"#86EFAC", fontSize:".85rem" }}>{open?"▴":"▾"}</span></div>
       </div>
@@ -455,11 +468,11 @@ function QuestaoCard({ q, cfg, onUpdate, onRemove }:{ q:Questao; cfg:Config; onU
             </div>
           ) : (
             <>
-              <div style={{ fontSize:".87rem", lineHeight:1.7, whiteSpace:"pre-wrap", color:"#1F2937", background:C.bg, border:"1px solid "+C.borda, borderRadius:"6px", padding:".8rem 1rem", marginBottom:".6rem" }}>{q.corpo}</div>
+              <div style={{ fontSize:".87rem", lineHeight:1.7, whiteSpace:"pre-wrap", color:"#1a3d00", background:"#f4f9ef", border:"1px solid #b8d98a", borderRadius:"6px", padding:".8rem 1rem", marginBottom:".6rem" }}>{q.corpo}</div>
               {q.defesa && (
                 <details>
-                  <summary style={{ cursor:"pointer", fontSize:".78rem", fontWeight:700, color:C.vd, padding:".3rem .5rem", background:C.card, borderRadius:"6px" }}>📖 Defesa / Gabarito Comentado</summary>
-                  <div style={{ background:"#fff", border:"1px solid "+C.borda, borderRadius:"6px", padding:".8rem 1rem", fontSize:".82rem", lineHeight:1.65, color:"#374151", whiteSpace:"pre-wrap", marginTop:".3rem" }}>{q.defesa}</div>
+                  <summary style={{ cursor:"pointer", fontSize:".78rem", fontWeight:700, color:"#1a3d00", padding:".3rem .5rem", background:"#e8f4d8", borderRadius:"6px", border:"1px solid #b8d98a" }}>Defesa / Gabarito Comentado</summary>
+                  <div style={{ background:"#f4f9ef", border:"1px solid #b8d98a", borderRadius:"6px", padding:".8rem 1rem", fontSize:".82rem", lineHeight:1.65, color:"#2a5a00", whiteSpace:"pre-wrap", marginTop:".3rem" }}>{q.defesa}</div>
                 </details>
               )}
             </>
@@ -482,13 +495,13 @@ function ProvaCard({ prova, onUpdate, onDelete }:{ prova:Prova; onUpdate:(p:Prov
   const updQ=(u:Questao)=>onUpdate({...prova,questoes:prova.questoes.map(q=>q.id===u.id?u:q)});
   const remQ=(id:number)=>{ if(!confirm("Excluir esta questão?"))return; onUpdate({...prova,questoes:prova.questoes.filter(q=>q.id!==id)}); };
   return (
-    <div style={{ background:C.bg, border:"1.5px solid "+C.borda, borderRadius:"8px", marginBottom:".7rem", overflow:"hidden" }}>
+    <div style={{ background:"#fff", border:"1px solid #b8d98a", borderRadius:"8px", marginBottom:".7rem", overflow:"hidden" }}>
       {showCfg&&<ConfigModal prova={prova} onSave={c=>{onUpdate({...prova,config:c});setShowCfg(false);}} onClose={()=>setShowCfg(false)}/>}
       {showGerar&&<GerarModal prova={prova} onGeradas={qs=>onUpdate({...prova,questoes:[...prova.questoes,...qs]})} onClose={()=>setShowGerar(false)}/>}
-      <div onClick={()=>setOpen(p=>!p)} style={{ background:C.card, padding:".5rem .9rem", display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer", borderBottom:"1px solid "+C.borda }}>
+      <div onClick={()=>setOpen(p=>!p)} style={{ background:"#e8f4d8", padding:".5rem .9rem", display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer", borderBottom:"1px solid #b8d98a" }}>
         <div style={{ display:"flex", alignItems:"center", gap:".4rem", flexWrap:"wrap" }}>
           <span style={{ fontWeight:700, fontSize:".84rem", color:C.vd }}>📝 {prova.nome}</span>
-          <span style={{ borderRadius:"99px", padding:"1px 7px", fontSize:".68rem", fontWeight:700, background:ok?"#D1FAE5":"#FEF3C7", color:ok?"#065F46":"#92400E" }}>{ok?"ok":"config"}</span>
+          <span style={{ borderRadius:"99px", padding:"1px 7px", fontSize:".68rem", fontWeight:700, background:ok?"#e8f4d8":"#fffbe0", color:ok?"#1a3d00":"#6b4a00" }}>{ok?"ok":"config"}</span>
           {nq>0&&<Tag>{nq} Q · {nap} aprov.</Tag>}
         </div>
         <div style={{ display:"flex", gap:".35rem", alignItems:"center" }} onClick={e=>e.stopPropagation()}>
@@ -500,7 +513,7 @@ function ProvaCard({ prova, onUpdate, onDelete }:{ prova:Prova; onUpdate:(p:Prov
         </div>
       </div>
       {open&&(
-        <div style={{ padding:".8rem 1rem" }}>
+        <div style={{ padding:".8rem 1rem", background:"#f4f9ef" }}>
           {prova.questoes.length>0&&(
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:".4rem", marginBottom:".7rem" }}>
               <span style={{ fontSize:".78rem", color:"#166534" }}>{nq} questão(ões) · {nap} aprovada(s)</span>
@@ -530,8 +543,8 @@ function ProjetoCard({ projeto, onUpdate, onDelete }:{ projeto:Projeto; onUpdate
   const updP=(vid:number,u:Prova)=>onUpdate({...projeto,provas:projeto.provas.map(v=>v.id===vid?u:v)});
   const delP=(vid:number)=>{ if(!confirm("Excluir prova?"))return; onUpdate({...projeto,provas:projeto.provas.filter(v=>v.id!==vid)}); };
   return (
-    <div style={{ background:"#fff", border:"2px solid "+C.vm, borderRadius:"10px", marginBottom:"1rem", overflow:"hidden", boxShadow:"0 2px 12px rgba(20,83,45,.10)" }}>
-      <div onClick={()=>setOpen(p=>!p)} style={{ background:"linear-gradient(90deg,#14532D,#166634 30%,#15803D)", padding:".6rem 1rem", display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer" }}>
+    <div style={{ background:"#fff", border:"1.5px solid #4a8a00", borderRadius:"8px", marginBottom:"1rem", overflow:"hidden", boxShadow:"0 2px 10px rgba(60,120,0,0.10)" }}>
+      <div onClick={()=>setOpen(p=>!p)} style={{ background:"linear-gradient(90deg,#000,#0a2500 40%,#0d3000)", padding:".6rem 1rem", borderBottom:"1px solid #2a5a00", display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer" }}>
         <div style={{ display:"flex", alignItems:"center", gap:".5rem", flexWrap:"wrap" }}>
           <span style={{ color:"#fff", fontWeight:700, fontSize:".9rem" }}>📁 {projeto.nome}</span>
           <Tag>{projeto.provas.length} prova(s)</Tag>
@@ -568,7 +581,7 @@ function ExportarTab({ projetos }:{ projetos:Projeto[] }) {
   const expRtf=()=>{ const qs=getQs();if(!qs.length){alert("Nenhuma questão para exportar.");return;} let rtf="{\\rtf1\\ansi\\deff0\n{\\fonttbl{\\f0 Arial;}}\n{\\colortbl;\\red20\\green83\\blue45;}\n\\f0\\fs24\n{\\b\\fs32\\cf1 ELABORA - QUESTOES DE CONCURSO}\\par\\par\n"; let last=""; qs.forEach(q=>{ const g=q._pnome+"|"+q._vnome; if(agrup&&g!==last){rtf+=`\\par{\\b\\fs26\\cf1 ${rtfE(q._pnome)} > ${rtfE(q._vnome)}}\\par`+(q._titulo?`{\\i ${rtfE(q._titulo)}}\\par`:"")+`\\par\n`;last=g;} rtf+=rtfE(q.corpo).replace(/\n/g,"\\par\n")+"\\par\\par\n"; if(comDef&&q.defesa){rtf+="{\\i\\cf1 --- DEFESA ---}\\par\n"+rtfE(q.defesa).replace(/\n/g,"\\par\n")+"\\par\\par\\par\n";} rtf+="\\par\n"; }); rtf+="}"; const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rtf],{type:"application/rtf"}));a.download="elabora_questoes.rtf";a.click(); };
   const expTxt=()=>{ const qs=getQs();if(!qs.length){alert("Nenhuma questão para exportar.");return;} let txt="ELABORA - QUESTOES DE CONCURSO\n"+"=".repeat(60)+"\n\n",last=""; qs.forEach(q=>{ const g=q._pnome+"|"+q._vnome; if(agrup&&g!==last){txt+="\n"+"-".repeat(50)+"\nProjeto: "+q._pnome+" | Prova: "+q._vnome+(q._titulo?" | "+q._titulo:"")+"\n"+"-".repeat(50)+"\n\n";last=g;} txt+=q.corpo+"\n";if(comDef&&q.defesa)txt+="\n"+q.defesa+"\n";txt+="\n\n\n"; }); const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/plain;charset=utf-8"}));a.download="elabora_questoes.txt";a.click(); };
   return (
-    <div style={{ padding:"1.2rem 1.5rem", maxWidth:"1200px" }}>
+    <div style={{ padding:"1.2rem 1.5rem", maxWidth:"1200px", color:"#1a3d00" }}>
       <SecTitle>📤 Exportar Questões</SecTitle>
       <div style={s.card}>
         {provasComQs.length===0?<Alert type="in">Gere questões para exportar.</Alert>:<Alert type="ok">Selecione as provas e clique em Exportar.</Alert>}
@@ -602,23 +615,26 @@ export default function App() {
   const updProj=(id:number,u:Projeto)=>setProjetos(p=>p.map(proj=>proj.id===id?u:proj));
   const delProj=(id:number)=>{ if(!confirm("Excluir projeto e tudo dentro?"))return; setProjetos(p=>p.filter(proj=>proj.id!==id)); };
   const TabBtn=({id,label}:{id:string;label:string})=>(
-    <button onClick={()=>setTab(id)} style={{ padding:".55rem 1.1rem", fontSize:".82rem", fontWeight:600, cursor:"pointer", borderBottom:tab===id?"3px solid #4ADE80":"3px solid transparent", color:tab===id?"#fff":"#86EFAC", background:"none", borderTop:"none", borderLeft:"none", borderRight:"none", fontFamily:"inherit", whiteSpace:"nowrap" as const }}>
+    <button onClick={()=>setTab(id)} style={{ padding:".6rem 1.6rem", fontSize:".82rem", fontWeight:600, cursor:"pointer", borderBottom:tab===id?"3px solid #7DC900":"3px solid transparent", borderTop:"none", borderLeft:"none", borderRight:"none", color:tab===id?"#CCFF33":"#5a8a20", background:"none", fontFamily:"inherit", whiteSpace:"nowrap" as const, letterSpacing:".08em", textTransform:"uppercase" as const, transition:"color .2s" }}>
       {label}
     </button>
   );
   return (
-    <div style={{ fontFamily:"'Segoe UI',Arial,sans-serif", background:C.bg, minHeight:"100vh", color:C.vd }}>
-      <div style={{ background:"linear-gradient(135deg,#14532D,#166534 40%,#15803D)", padding:"1rem 1.5rem .8rem", boxShadow:"0 3px 16px rgba(20,83,45,.25)" }}>
-        <p style={{ fontSize:"1.4rem", fontWeight:900, color:"#fff", textTransform:"uppercase", letterSpacing:".03em", margin:0 }}>♾️ Elabora — Gerador de Questões de Concurso</p>
-        <p style={{ fontSize:".78rem", color:"#86EFAC", marginTop:".15rem" }}>Projetos → Provas → Questões</p>
+    <div style={{ fontFamily:"'Segoe UI',Arial,sans-serif", background:"#f4f9ef", minHeight:"100vh", color:"#1a3d00" }}>
+      <div style={{ background:"linear-gradient(135deg,#000000 0%,#0a1f0a 30%,#0d2e0d 60%,#000000 100%)", padding:".65rem 1.5rem", border:"2px solid #3a7a00", borderLeft:"none", borderRight:"none", boxShadow:"0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(100,220,50,0.15), 0 0 18px rgba(80,180,0,0.18)", display:"flex", alignItems:"center", gap:"1rem" }}>
+        <img src="/Logo_Elabora.png" alt="Elabora" style={{ height:"64px", width:"64px", objectFit:"contain", flexShrink:0 }} />
+        <p style={{ fontSize:"1.6rem", fontWeight:900, letterSpacing:".04em", margin:0, lineHeight:1, whiteSpace:"nowrap" as const, background:"linear-gradient(180deg, #CCFF33 0%, #7DC900 35%, #4A8A00 65%, #2E5500 100%)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.8))" }}>
+          Soluções Pedagógicas
+        </p>
       </div>
-      <div style={{ display:"flex", background:"#166534", padding:"0 1.5rem", gap:".25rem", overflowX:"auto" as const }}>
-        <TabBtn id="projetos" label="📁 Projetos"/><TabBtn id="exportar" label="📤 Exportar"/>
+      <div style={{ height:"6px", background:"linear-gradient(90deg, #000 0%, #3a7a00 20%, #7DC900 50%, #3a7a00 80%, #000 100%)" }} />
+      <div style={{ background:"linear-gradient(180deg,#0d1f05 0%,#0a1a04 100%)", padding:"0 1.5rem", display:"flex", gap:"0", overflowX:"auto" as const, borderBottom:"1px solid #2a5a00" }}>
+        <TabBtn id="projetos" label="Projetos"/><TabBtn id="exportar" label="Exportar"/>
       </div>
       {tab==="projetos"&&(
-        <div style={{ padding:"1.2rem 1.5rem", maxWidth:"1200px" }}>
+        <div style={{ padding:"1.2rem 1.5rem", maxWidth:"1200px", color:"#1a3d00" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:".9rem", flexWrap:"wrap" as const, gap:".5rem" }}>
-            <div style={s.secT}>📁 Meus Projetos</div>
+            <div style={s.secT}>Meus Projetos</div>
             <button style={s.bp} onClick={addProj}>＋ Novo Projeto</button>
           </div>
           {projetos.length===0
