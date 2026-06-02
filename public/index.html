@@ -80,12 +80,12 @@ button:disabled{opacity:.4;cursor:not-allowed;}
 .bloco-body{padding:14px;}
 
 /* tipos de questão por bloco */
-.tipos-qtd-grid{display:grid;grid-template-columns:1fr;gap:6px;margin-top:4px;}
-.tipo-qtd-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--bdr);border-radius:var(--rad);background:var(--bg);}
+.tipos-qtd-grid{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
+.tipo-qtd-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--rad);background:var(--bg);width:100%;}
 .tipo-qtd-row.active{background:var(--gl);border-color:var(--gm);}
-.tipo-check{width:15px;height:15px;accent-color:var(--gm);cursor:pointer;flex-shrink:0;}
-.tipo-nome{font-size:12px;font-weight:500;flex:1;cursor:pointer;}
-.tipo-num{width:52px;text-align:center;padding:4px 5px;font-size:12px;}
+.tipo-check{width:16px;height:16px;accent-color:var(--gm);cursor:pointer;flex-shrink:0;}
+.tipo-nome{font-size:13px;font-weight:500;flex:1;cursor:pointer;white-space:nowrap;}
+.tipo-num{width:60px;text-align:center;padding:5px 6px;font-size:13px;flex-shrink:0;}
 .tipo-num:disabled{opacity:.3;}
 
 .img-area{border:1.5px dashed var(--bdrs);border-radius:var(--rad);padding:.875rem;text-align:center;cursor:pointer;transition:all .15s;}
