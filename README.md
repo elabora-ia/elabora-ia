@@ -1,16 +1,43 @@
-## Hi there 👋
+# Gerador de Provas Pedagógicas
 
-<!--
-**elabora-ia/elabora-ia** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Ferramenta web para geração de provas e questões com IA.
 
-Here are some ideas to get you started:
+## Deploy no Vercel
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+### 1. Suba para o GitHub
+- Crie um repositório no GitHub (pode ser privado)
+- Faça upload de todos os arquivos desta pasta
+
+### 2. Conecte ao Vercel
+- Acesse vercel.com e faça login com sua conta GitHub
+- Clique em "Add New Project"
+- Selecione o repositório que criou
+- Clique em "Deploy"
+
+### 3. Configure a chave da API
+- No painel do Vercel, vá em Settings → Environment Variables
+- Adicione a variável:
+  - **Name:** `ANTHROPIC_API_KEY`
+  - **Value:** sua chave `sk-ant-api03-...`
+- Clique em Save e depois em "Redeploy"
+
+### 4. Acesse
+- O Vercel fornecerá um endereço como `https://gerador-provas-xxx.vercel.app`
+- Compartilhe com outros professores — funciona em qualquer navegador
+
+## Estrutura
+```
+gerador-provas/
+├── api/
+│   └── chat.js          ← backend (proxy seguro para a API Anthropic)
+├── public/
+│   └── index.html       ← frontend (toda a interface)
+├── vercel.json          ← configuração do Vercel
+└── README.md
+```
+
+## Desenvolvimento local
+Se quiser testar localmente antes do deploy:
+1. Instale o Vercel CLI: `npm i -g vercel`
+2. Crie um arquivo `.env` com: `ANTHROPIC_API_KEY=sua-chave`
+3. Rode: `vercel dev`
