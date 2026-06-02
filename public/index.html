@@ -1,1189 +1,178 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Elabora IA — Gerador de Provas</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --green:#0F6E56;--gl:#E1F5EE;--gm:#1D9E75;--gd:#085041;
-  --bg:#F7F6F3;--sur:#FFFFFF;--bdr:rgba(0,0,0,0.10);--bdrs:rgba(0,0,0,0.18);
-  --txt:#1A1A18;--mut:#6B6B66;--hnt:#9B9B96;
-  --rad:10px;--radl:14px;
-  --red:#C0392B;--redbg:#fdf0f0;--redbdr:#f5c6c6;
-  --blue:#185FA5;--bluebg:#E6F1FB;--bluebdr:#378ADD;
-  --amber:#854F0B;--amberbg:#FAEEDA;--amberbdr:#BA7517;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
-.app{max-width:820px;margin:0 auto;padding:2rem 1.25rem 5rem;}
-
-.topbar{display:flex;align-items:center;gap:12px;padding-bottom:1.25rem;border-bottom:1px solid var(--bdr);margin-bottom:1.75rem;}
-.logo{width:40px;height:40px;background:var(--green);border-radius:var(--rad);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.logo svg{width:20px;height:20px;fill:none;stroke:#E1F5EE;stroke-width:2;stroke-linecap:round;}
-.brand{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
-.bc{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);}
-.bc .act{color:var(--txt);font-weight:500;}
-.bc-sep{font-size:10px;color:var(--hnt);}
-
-.step{display:none;}.step.vis{display:block;}
-.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--radl);padding:1.375rem;margin-bottom:1rem;}
-.stitle{font-size:11px;font-weight:500;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.875rem;}
-.field{margin-bottom:.875rem;}
-.field label{display:block;font-size:12px;font-weight:500;color:var(--mut);margin-bottom:4px;}
-.field input,.field select,.field textarea{width:100%;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);border:1px solid var(--bdrs);border-radius:var(--rad);color:var(--txt);transition:border-color .15s,box-shadow .15s;}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gm);box-shadow:0 0 0 3px rgba(29,158,117,.12);}
-.field textarea{resize:vertical;min-height:64px;}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-
-button{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--rad);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid var(--bdrs);background:var(--sur);color:var(--txt);}
-button:hover{background:var(--bg);}
-button.pri{background:var(--green);color:#E1F5EE;border-color:var(--green);}
-button.pri:hover{background:var(--gd);}
-button.sec{background:var(--gl);color:var(--gd);border-color:var(--gm);}
-button.sec:hover{background:#c8eee2;}
-button.del{color:var(--red);border-color:var(--redbdr);}
-button.del:hover{background:var(--redbg);}
-button.info{color:var(--blue);border-color:var(--bluebdr);background:var(--bluebg);}
-button.info:hover{background:#d0e8f8;}
-button.warn{color:var(--amber);border-color:var(--amberbdr);background:var(--amberbg);}
-button.warn:hover{background:#f0d8a8;}
-button.ok{color:var(--gd);border-color:var(--gm);background:var(--gl);}
-button.ok:hover{background:#c8eee2;}
-button:disabled{opacity:.4;cursor:not-allowed;}
-.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem;}
-
-.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
-.pill{font-size:12px;padding:5px 13px;border-radius:99px;border:1px solid var(--bdrs);background:var(--sur);color:var(--mut);cursor:pointer;transition:all .15s;user-select:none;}
-.pill.sel{background:var(--gl);border-color:var(--gm);color:var(--gd);font-weight:500;}
-
-.dif-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px;}
-.dif-item{text-align:center;}
-.dif-item label{display:block;font-size:11px;color:var(--mut);margin-bottom:4px;font-weight:500;}
-.dif-item input{text-align:center;padding:6px 4px;font-size:13px;font-weight:500;}
-.dif-total{font-size:12px;margin-top:6px;text-align:right;color:var(--mut);}
-.dif-total.ok{color:var(--green);}
-.dif-total.err{color:var(--red);}
-
-.nivel-wrap{margin-top:4px;}
-.nivel-etapas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
-.nivel-series{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:var(--bg);border-radius:var(--rad);border:1px solid var(--bdr);}
-.nivel-series.hide{display:none;}
-
-/* bloco conteúdo */
-.bloco{border:1px solid var(--bdr);border-radius:var(--radl);margin-bottom:.875rem;overflow:hidden;}
-.bloco-hd{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--bdr);}
-.bloco-num{font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;background:var(--gl);color:var(--gd);flex-shrink:0;}
-.bloco-body{padding:14px;}
-
-/* tipos de questão por bloco */
-.tipos-qtd-grid{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
-.tipo-qtd-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--bdr);border-radius:var(--rad);background:var(--bg);width:100%;}
-.tipo-qtd-row.active{background:var(--gl);border-color:var(--gm);}
-.tipo-check{width:16px;height:16px;accent-color:var(--gm);cursor:pointer;flex-shrink:0;}
-.tipo-nome{font-size:13px;font-weight:500;flex:1;cursor:pointer;white-space:nowrap;}
-.tipo-num{width:60px;text-align:center;padding:5px 6px;font-size:13px;flex-shrink:0;}
-.tipo-num:disabled{opacity:.3;}
-
-.img-area{border:1.5px dashed var(--bdrs);border-radius:var(--rad);padding:.875rem;text-align:center;cursor:pointer;transition:all .15s;}
-.img-area:hover{border-color:var(--gm);background:var(--gl);}
-.img-area.has-img{border-style:solid;border-color:var(--gm);}
-.img-area img{max-width:100%;max-height:100px;border-radius:6px;display:block;margin:0 auto 4px;}
-.img-area p{font-size:12px;color:var(--mut);}
-.img-area input[type=file]{display:none;}
-
-.infobar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 13px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rad);font-size:12px;color:var(--mut);margin-bottom:1.125rem;}
-.infobar strong{color:var(--txt);}
-
-/* questões */
-.qcard{border:1px solid var(--bdr);border-radius:var(--rad);margin-bottom:.875rem;overflow:hidden;}
-.qcard.aprovada{border-color:var(--gm);}
-.qhead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 13px;background:var(--bg);border-bottom:1px solid var(--bdr);}
-.qcard.aprovada .qhead{background:var(--gl);}
-.qnum{font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;background:var(--gl);color:var(--gd);flex-shrink:0;}
-.qtitle{font-size:13px;font-weight:500;flex:1;min-width:100px;}
-.badge{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--bdrs);color:var(--mut);white-space:nowrap;}
-.badge.apr{background:var(--gl);border-color:var(--gm);color:var(--gd);}
-.qbody{padding:12px 14px;font-size:13px;line-height:1.8;white-space:pre-wrap;max-height:400px;overflow-y:auto;font-family:'DM Sans',sans-serif;}
-.qbody textarea{width:100%;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.8;background:var(--bg);border:1px solid var(--gm);border-radius:var(--rad);padding:10px 12px;resize:vertical;min-height:200px;color:var(--txt);}
-.qactions{display:flex;gap:6px;flex-wrap:wrap;padding:8px 13px;border-top:1px solid var(--bdr);background:var(--bg);}
-.qactions button{padding:4px 10px;font-size:11px;}
-.diag-panel{padding:12px 14px;background:#F0F4FE;border-top:1px solid #B5D4F4;font-size:12px;line-height:1.7;display:none;white-space:pre-wrap;}
-.diag-panel.vis{display:block;}
-
-.empty{padding:2rem;text-align:center;color:var(--hnt);font-size:13px;border:1px dashed var(--bdrs);border-radius:var(--rad);}
-
-.togrow{display:flex;align-items:center;gap:9px;margin-bottom:.5rem;}
-.togrow label{font-size:13px;color:var(--mut);cursor:pointer;user-select:none;}
-.tog{width:34px;height:19px;background:var(--bdrs);border-radius:99px;position:relative;cursor:pointer;border:none;padding:0;transition:background .2s;flex-shrink:0;}
-.tog.on{background:var(--gm);}
-.tog::after{content:'';position:absolute;top:2.5px;left:2.5px;width:14px;height:14px;background:white;border-radius:50%;transition:transform .2s;}
-.tog.on::after{transform:translateX(15px);}
-.xtra{display:none;margin-bottom:.625rem;padding-left:43px;}.xtra.vis{display:block;}
-
-.spin{width:13px;height:13px;border:2px solid var(--bdrs);border-top-color:var(--gm);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.cur::after{content:'▋';animation:blink 1s step-end infinite;color:var(--gm);}
-@keyframes blink{50%{opacity:0;}}
-
-.rtable{width:100%;border-collapse:collapse;font-size:13px;}
-.rtable th{text-align:left;padding:6px 10px;font-size:11px;font-weight:500;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--bdr);}
-.rtable td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:middle;}
-.rtable tr:last-child td{border-bottom:none;}
-.count-badge{font-size:11px;background:var(--gl);color:var(--gd);padding:2px 8px;border-radius:99px;margin-left:6px;font-weight:500;}
-.divider{border:none;border-top:1px solid var(--bdr);margin:1rem 0;}
-
-/* lista projetos */
-.proj-item{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--radl);margin-bottom:.75rem;overflow:hidden;}
-.proj-item-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;}
-.proj-item-hd:hover{background:var(--bg);}
-.proj-item-nome{font-size:14px;font-weight:500;flex:1;}
-.proj-item-meta{font-size:12px;color:var(--mut);}
-.proj-chevron{font-size:18px;color:var(--mut);transition:transform .2s;flex-shrink:0;}
-.proj-item.open .proj-chevron{transform:rotate(180deg);}
-.proj-provas{display:none;padding:0 16px 12px;border-top:1px solid var(--bdr);}
-.proj-item.open .proj-provas{display:block;}
-.prova-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;}
-.prova-row:last-of-type{border-bottom:none;}
-.prova-row-nome{font-size:13px;flex:1;min-width:120px;}
-.prova-row-meta{font-size:11px;color:var(--mut);}
-
-/* resultados */
-.res-section{margin-top:2rem;}
-.res-proj-card{border:1px solid var(--gm);border-radius:var(--radl);margin-bottom:1.5rem;overflow:hidden;}
-.res-proj-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--gl);border-bottom:1px solid var(--gm);cursor:pointer;}
-.res-proj-hd:hover{background:#c8eee2;}
-.res-proj-nome{font-size:14px;font-weight:500;color:var(--gd);flex:1;}
-.res-proj-body{padding:0 16px 16px;}
-.res-prova-block{margin-top:14px;}
-.res-prova-nome{font-size:13px;font-weight:500;padding:8px 0;border-bottom:1px solid var(--bdr);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
-
-/* gerar tudo */
-.gt-bar-wrap{background:var(--bdr);border-radius:99px;height:6px;overflow:hidden;margin:8px 0;}
-.gt-bar{height:100%;background:var(--gm);border-radius:99px;width:0%;transition:width .3s;}
-.gt-status{font-size:12px;color:var(--mut);margin-top:4px;}
-
-/* export buttons */
-.export-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem;}
-</style>
-</head>
-<body>
-<div class="app">
-
-<div class="topbar">
-  <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V7L12 3z"/></svg></div>
-  <span class="brand">Elabora IA</span>
-  <div class="bc">
-    <span id="bc0">Projetos</span><span class="bc-sep">›</span>
-    <span id="bc1">Projeto</span><span class="bc-sep">›</span>
-    <span id="bc2">Prova</span><span class="bc-sep">›</span>
-    <span id="bc3">Questões</span>
-  </div>
-</div>
-
-<!-- ═══ HOME ═══ -->
-<div class="step" id="stepHome">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px">
-    <div>
-      <p style="font-family:'Playfair Display',serif;font-size:18px;font-weight:500">Meus projetos</p>
-      <p style="font-size:13px;color:var(--mut);margin-top:3px">Organize projetos e provas, depois gere tudo de uma vez</p>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="sec" onclick="novoProjeto()">+ Novo projeto</button>
-      <button class="pri" id="btn-gt" onclick="gerarTudo()" disabled>✦ Gerar Tudo</button>
-    </div>
-  </div>
-  <div id="proj-list"><div class="empty">Nenhum projeto ainda — clique em "+ Novo projeto"</div></div>
-  <div id="gt-progress" style="display:none;margin-top:1rem" class="card">
-    <div class="gt-bar-wrap"><div class="gt-bar" id="gt-bar"></div></div>
-    <p class="gt-status" id="gt-status">Iniciando...</p>
-  </div>
-  <div id="resultados-section" style="display:none" class="res-section">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem">
-      <p style="font-size:14px;font-weight:500;color:var(--gd)">Questões geradas</p>
-      <button style="font-size:11px;padding:4px 10px" onclick="limparResultados()">Limpar visualização</button>
-    </div>
-    <div id="resultados-lista"></div>
-  </div>
-</div>
-
-<!-- ═══ PROJETO ═══ -->
-<div class="step" id="stepProjeto">
-  <div class="infobar">
-    <button style="padding:0;border:none;background:none;color:var(--mut);cursor:pointer;font-size:12px" onclick="goStep('stepHome');renderProjList()">← Lista de projetos</button>
-  </div>
-  <div class="card">
-    <p class="stitle">Nome do projeto</p>
-    <div class="field"><input id="proj-nome-input" type="text" placeholder="Ex: Simulado Concurso Municipal 2025"/></div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.625rem;flex-wrap:wrap;gap:8px">
-    <p class="stitle" style="margin:0">Provas do projeto <span class="count-badge" id="provas-count">0</span></p>
-    <button class="sec" onclick="novaProva()">+ Nova prova</button>
-  </div>
-  <div id="provas-list"><div class="empty">Nenhuma prova ainda</div></div>
-  <div class="acts" style="margin-top:1.25rem">
-    <button onclick="goStep('stepHome');renderProjList()">← Cancelar</button>
-    <button class="pri" onclick="salvarProjeto()">Salvar projeto ✓</button>
-  </div>
-</div>
-
-<!-- ═══ PROVA ═══ -->
-<div class="step" id="stepProva">
-  <div class="infobar">
-    <span id="prova-proj-lbl" style="color:var(--mut)"></span><span class="bc-sep">›</span>
-    <strong id="prova-nome-lbl">Nova prova</strong>
-    <div style="display:flex;gap:6px;margin-left:auto">
-      <button style="padding:3px 9px;font-size:11px" onclick="voltarParaProjeto()">← Projeto</button>
-      <button style="padding:3px 9px;font-size:11px" onclick="goStep('stepHome');renderProjList()">⌂ Projetos</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <p class="stitle">Identificação</p>
-    <div class="field"><label>Nome da prova</label><input id="v-nome" type="text" placeholder="Ex: Língua Portuguesa — Cargo Técnico"/></div>
-  </div>
-
-  <div class="card">
-    <p class="stitle">Nível de escolaridade</p>
-    <div class="nivel-wrap">
-      <div class="nivel-etapas" id="nivel-etapas">
-        <span class="pill" data-etapa="fund-inc">Fundamental Incompleto</span>
-        <span class="pill" data-etapa="fund-comp">Fundamental Completo</span>
-        <span class="pill" data-etapa="medio">Ensino Médio</span>
-        <span class="pill" data-etapa="superior">Ensino Superior</span>
-      </div>
-      <div class="nivel-series hide" id="series-fund-inc">
-        <span class="pill" data-serie="Fundamental Incompleto (geral)">Geral</span>
-        <span class="pill" data-serie="1º ano">1º ano</span><span class="pill" data-serie="2º ano">2º ano</span>
-        <span class="pill" data-serie="3º ano">3º ano</span><span class="pill" data-serie="4º ano">4º ano</span>
-        <span class="pill" data-serie="5º ano">5º ano</span><span class="pill" data-serie="6º ano">6º ano</span>
-        <span class="pill" data-serie="7º ano">7º ano</span>
-      </div>
-      <div class="nivel-series hide" id="series-fund-comp">
-        <span class="pill" data-serie="Fundamental Completo (geral)">Geral</span>
-        <span class="pill" data-serie="8º ano">8º ano</span><span class="pill" data-serie="9º ano">9º ano</span>
-      </div>
-      <div class="nivel-series hide" id="series-medio">
-        <span class="pill" data-serie="Ensino Médio (geral)">Geral</span>
-        <span class="pill" data-serie="1ª série (EM)">1ª série</span>
-        <span class="pill" data-serie="2ª série (EM)">2ª série</span>
-        <span class="pill" data-serie="3ª série (EM)">3ª série</span>
-      </div>
-      <div class="nivel-series hide" id="series-superior">
-        <span class="pill" data-serie="Ensino Superior (geral)">Geral</span>
-        <span class="pill" data-serie="1º período">1º período</span><span class="pill" data-serie="2º período">2º período</span>
-        <span class="pill" data-serie="3º período">3º período</span><span class="pill" data-serie="4º período">4º período</span>
-        <span class="pill" data-serie="5º período ou mais">5º+</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <p class="stitle">Grau de dificuldade <span style="font-size:11px;font-weight:400;text-transform:none;letter-spacing:0">— distribua em % (total = 100%)</span></p>
-    <div class="dif-grid">
-      <div class="dif-item"><label>Muito Fácil</label><input type="number" id="dif-mf" min="0" max="100" value="0" oninput="calcDif()"/></div>
-      <div class="dif-item"><label>Fácil</label><input type="number" id="dif-f" min="0" max="100" value="0" oninput="calcDif()"/></div>
-      <div class="dif-item"><label>Médio</label><input type="number" id="dif-m" min="0" max="100" value="0" oninput="calcDif()"/></div>
-      <div class="dif-item"><label>Difícil</label><input type="number" id="dif-d" min="0" max="100" value="0" oninput="calcDif()"/></div>
-      <div class="dif-item"><label>Muito Difícil</label><input type="number" id="dif-md" min="0" max="100" value="0" oninput="calcDif()"/></div>
-    </div>
-    <p class="dif-total" id="dif-total">Total: 0%</p>
-  </div>
-
-  <div class="card">
-    <p class="stitle">Configurações das alternativas</p>
-    <div class="row3">
-      <div class="field"><label>Número de alternativas</label>
-        <select id="v-alts">
-          <option value="0">Selecione...</option>
-          <option value="2">2 alternativas</option><option value="3">3 alternativas</option>
-          <option value="4">4 alternativas</option><option value="5">5 alternativas</option>
-        </select>
-      </div>
-      <div class="field"><label>Formato</label>
-        <select id="v-formato">
-          <option value="">Selecione...</option>
-          <option value="com-marcador">Com marcadores (A, B, C...)</option>
-          <option value="sem-marcador">Sem marcadores</option>
-        </select>
-      </div>
-      <div class="field"><label>Alternativa correta</label>
-        <select id="v-correta">
-          <option value="">Selecione...</option>
-          <option value="alternar">Alternar</option>
-          <option value="primeira">Fixar na primeira</option>
-          <option value="segunda">Fixar na segunda</option>
-          <option value="terceira">Fixar na terceira</option>
-          <option value="quarta">Fixar na quarta</option>
-          <option value="quinta">Fixar na quinta</option>
-        </select>
-      </div>
-    </div>
-    <div class="field"><label>Instruções / cabeçalho (opcional)</label>
-      <input id="v-instr" type="text" placeholder="Ex: Leia atentamente cada questão antes de responder."/>
-    </div>
-  </div>
-
-  <div class="card">
-    <p class="stitle">Lista de conteúdos</p>
-    <div class="field"><label>Cole ou digite os conteúdos (um por linha)</label>
-      <textarea id="conteudos-raw" style="min-height:100px" placeholder="Ex:&#10;Interpretação de Texto&#10;Geometria Plana&#10;Direito Constitucional&#10;Atualidades"></textarea>
-    </div>
-    <div class="acts" style="margin-top:.5rem">
-      <button class="sec" onclick="distribuirConteudos()">⊞ Distribuir conteúdos</button>
-    </div>
-  </div>
-
-  <div id="blocos-container"></div>
-  <div id="btn-add-wrap" style="display:none;margin-bottom:1rem">
-    <button class="sec" style="width:100%;justify-content:center" onclick="adicionarBlocoManual()">+ Adicionar conteúdo</button>
-  </div>
-
-  <div class="acts">
-    <button onclick="voltarParaProjeto()">← Cancelar</button>
-    <button class="pri" onclick="salvarProva()">Salvar prova ✓</button>
-  </div>
-</div>
-
-<!-- ═══ QUESTÕES ═══ -->
-<div class="step" id="stepQ">
-  <div class="infobar">
-    <span id="q-proj-lbl" style="color:var(--mut)"></span><span class="bc-sep">›</span>
-    <span id="q-prova-lbl" style="color:var(--mut)"></span><span class="bc-sep">›</span>
-    <strong>Questões</strong>
-    <div style="display:flex;gap:6px;margin-left:auto;flex-wrap:wrap">
-      <button style="padding:3px 9px;font-size:11px" onclick="voltarParaProvaEditar()">✎ Editar prova</button>
-      <button style="padding:3px 9px;font-size:11px" onclick="voltarParaProjeto()">← Projeto</button>
-      <button style="padding:3px 9px;font-size:11px" onclick="goStep('stepHome');renderProjList()">⌂ Projetos</button>
-    </div>
-  </div>
-
-  <!-- Nova questão manual -->
-  <div class="card">
-    <p class="stitle">Nova questão manual</p>
-    <div class="row2">
-      <div class="field"><label>Disciplina / Conteúdo</label>
-        <select id="qdisc">
-          <option value="">Selecione...</option>
-          <option>Língua Portuguesa</option><option>Matemática</option><option>História</option>
-          <option>Geografia</option><option>Ciências</option><option>Biologia</option>
-          <option>Física</option><option>Química</option><option>Inglês</option>
-          <option>Atualidades</option><option>Raciocínio Lógico</option>
-          <option>Direito Constitucional</option><option>Direito Administrativo</option>
-          <option>Informática</option><option>Legislação Específica</option>
-          <option>Conhecimentos Gerais</option>
-        </select>
-      </div>
-      <div class="field"><label>Dificuldade</label>
-        <select id="qdif">
-          <option value="">Selecione...</option>
-          <option>Muito Fácil</option><option>Fácil</option>
-          <option>Médio</option><option>Difícil</option><option>Muito Difícil</option>
-        </select>
-      </div>
-    </div>
-    <div class="field"><label>Tema / Conteúdo específico</label>
-      <input id="qtema" type="text" placeholder="Ex: Concordância verbal — sujeito composto"/>
-    </div>
-    <div class="field"><label>Tipo de questão</label>
-      <div class="pills" id="qtipos">
-        <span class="pill" data-t="objetiva-direta">Objetiva direta</span>
-        <span class="pill" data-t="analise-assertivas">Análise de assertivas</span>
-        <span class="pill" data-t="verdadeiro-falso">Verdadeiro ou Falso</span>
-        <span class="pill" data-t="relacionar-colunas">Relacionar colunas</span>
-        <span class="pill" data-t="preencher-lacunas">Preencher lacunas</span>
-        <span class="pill" data-t="assercao-razao">Asserção e razão</span>
-        <span class="pill" data-t="ordenacao">Ordenação / Sequência</span>
-        <span class="pill" data-t="discursiva">Discursiva</span>
-      </div>
-    </div>
-
-    <hr class="divider"/>
-    <p class="stitle" style="margin-bottom:.625rem">Opções pedagógicas</p>
-
-    <div class="togrow">
-      <button class="tog" id="tog-desc" onclick="togOpt('desc')"></button>
-      <label onclick="togOpt('desc')">Incluir descritor</label>
-    </div>
-    <div class="xtra" id="xtra-desc">
-      <div class="row2" style="margin-bottom:.5rem">
-        <div class="field" style="margin-bottom:0"><label>Código do descritor</label><input id="q-desc-cod" type="text" placeholder="Ex: D15"/></div>
-        <div class="field" style="margin-bottom:0"><label>Descrição do descritor</label><input id="q-desc-txt" type="text" placeholder="Ex: Resolver problemas com frações"/></div>
-      </div>
-    </div>
-
-    <div class="togrow">
-      <button class="tog" id="tog-bncc" onclick="togOpt('bncc')"></button>
-      <label onclick="togOpt('bncc')">Incluir habilidade BNCC</label>
-    </div>
-    <div class="xtra" id="xtra-bncc">
-      <div class="field" style="margin-bottom:.5rem"><label>Código da habilidade</label><input id="qbncc" type="text" placeholder="Ex: EF09LP01 — ou deixe em branco para sugestão automática"/></div>
-    </div>
-
-    <div class="togrow">
-      <button class="tog" id="tog-bloom" onclick="togOpt('bloom')"></button>
-      <label onclick="togOpt('bloom')">Identificar nível de Bloom na defesa</label>
-    </div>
-
-    <div class="togrow">
-      <button class="tog" id="tog-gab" onclick="togOpt('gab')"></button>
-      <label onclick="togOpt('gab')">Incluir gabarito / defesa</label>
-    </div>
-
-    <div class="acts"><button class="pri" id="btn-gerar" onclick="gerarQManual()">✦ Gerar questão</button></div>
-  </div>
-
-  <!-- Lista de questões -->
-  <div style="margin-top:1.5rem">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.625rem;flex-wrap:wrap;gap:8px">
-      <p class="stitle" style="margin:0">Questões geradas <span class="count-badge" id="qcount">0</span></p>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">
-        <button class="sec" id="btn-export-docx" onclick="exportarDocx()" style="font-size:12px;padding:6px 12px" disabled>↓ DOCX</button>
-        <button class="sec" id="btn-export-pdf" onclick="exportarPdf()" style="font-size:12px;padding:6px 12px" disabled>↓ PDF</button>
-        <button class="sec" id="btn-export-drive" onclick="exportarDrive()" style="font-size:12px;padding:6px 12px" disabled>↑ Drive</button>
-        <button class="pri" id="btn-resumo" onclick="toResumo()" style="font-size:12px;padding:6px 12px" disabled>Ver resumo →</button>
-      </div>
-    </div>
-    <div id="qlist"><div class="empty">Nenhuma questão ainda</div></div>
-  </div>
-</div>
-
-<!-- ═══ RESUMO ═══ -->
-<div class="step" id="stepResumo">
-  <div class="infobar"><span>Resumo da prova</span>
-    <div style="display:flex;gap:6px;margin-left:auto">
-      <button style="padding:3px 9px;font-size:11px" onclick="goStep('stepQ')">← Questões</button>
-      <button style="padding:3px 9px;font-size:11px" onclick="voltarParaProjeto()">← Projeto</button>
-      <button style="padding:3px 9px;font-size:11px" onclick="goStep('stepHome');renderProjList()">⌂ Projetos</button>
-    </div>
-  </div>
-  <div class="card" id="r-header"></div>
-  <div class="card" id="r-questoes"></div>
-  <div class="acts">
-    <button class="sec" onclick="exportarDocx()">↓ DOCX</button>
-    <button class="sec" onclick="exportarPdf()">↓ PDF</button>
-    <button class="sec" onclick="exportarDrive()">↑ Google Drive</button>
-    <button class="pri" onclick="goStep('stepQ')">+ Mais questões</button>
-    <button onclick="goStep('stepHome');renderProjList()">⌂ Projetos</button>
-  </div>
-</div>
-
-</div>
-<script>
-// ── estado ───────────────────────────────────────────────────────
-const togs={desc:false,bncc:false,bloom:false,gab:false};
-let projetos=JSON.parse(localStorage.getItem('gp_projetos')||'[]');
-let curProjId=null,curProvaId=null,blocoCount=0;
-
-function salvarStorage(){localStorage.setItem('gp_projetos',JSON.stringify(projetos));}
-function getCurProj(){return projetos.find(p=>p.id===curProjId);}
-function getCurProva(){return getCurProj()?.provas.find(v=>v.id===curProvaId);}
-
-// ── navegação ────────────────────────────────────────────────────
-function goStep(id){
-  document.querySelectorAll('.step').forEach(s=>s.classList.remove('vis'));
-  document.getElementById(id)?.classList.add('vis');
-  window.scrollTo({top:0,behavior:'smooth'});
-  const order=['stepHome','stepProjeto','stepProva','stepQ','stepResumo'];
-  const idx=order.indexOf(id);
-  ['bc0','bc1','bc2','bc3'].forEach((bc,i)=>document.getElementById(bc).classList.toggle('act',i<=Math.max(0,idx-1)));
-}
-
-// ── HOME ─────────────────────────────────────────────────────────
-function renderProjList(){
-  const list=document.getElementById('proj-list');
-  const btnGt=document.getElementById('btn-gt');
-  if(!projetos.length){list.innerHTML='<div class="empty">Nenhum projeto ainda — clique em "+ Novo projeto"</div>';btnGt.disabled=true;return;}
-  const temConteudo=projetos.some(p=>p.provas.some(v=>v.blocos&&v.blocos.some(b=>Object.values(b.tipos||{}).some(n=>n>0)||(b.qtd||0)>0)));
-  btnGt.disabled=!projetos.some(p=>p.provas.length>0);
-  list.innerHTML=projetos.map(p=>`
-    <div class="proj-item" id="pi-${p.id}">
-      <div class="proj-item-hd" onclick="toggleProjItem('${p.id}')">
-        <span class="proj-item-nome">${p.nome||'Projeto sem nome'}</span>
-        <span class="proj-item-meta">${p.provas.length} prova(s)</span>
-        <button class="sec" style="padding:4px 10px;font-size:12px" onclick="event.stopPropagation();editarProjeto('${p.id}')">✎ Editar</button>
-        <button class="del" style="padding:4px 10px;font-size:12px" onclick="event.stopPropagation();deletarProjeto('${p.id}')">✕</button>
-        <span class="proj-chevron">⌄</span>
-      </div>
-      <div class="proj-provas">
-        ${p.provas.length?p.provas.map(v=>`
-          <div class="prova-row">
-            <span class="prova-row-nome">${v.nome||'Prova sem nome'}</span>
-            <span class="prova-row-meta">${v.serie||v.nivel||''} · ${v.qs.length} questão(ões)</span>
-            <button class="sec" style="padding:3px 9px;font-size:11px" onclick="abrirProvaDeHome('${p.id}','${v.id}')">✎ Editar</button>
-            <button class="pri" style="padding:3px 9px;font-size:11px" onclick="irParaQuestoes('${p.id}','${v.id}')">Questões →</button>
-            <button class="del" style="padding:3px 9px;font-size:11px" onclick="deletarProvaDeHome('${p.id}','${v.id}')">✕</button>
-          </div>`).join('')
-        :'<p style="font-size:13px;color:var(--hnt);padding:8px 0">Nenhuma prova</p>'}
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr)">
-          <button class="sec" style="font-size:12px;padding:5px 12px" onclick="editarProjeto('${p.id}');novaProva()">+ Nova prova</button>
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-function toggleProjItem(id){document.getElementById('pi-'+id)?.classList.toggle('open');}
-
-function novoProjeto(){
-  const p={id:'p'+Date.now(),nome:'',provas:[]};
-  projetos.push(p);salvarStorage();curProjId=p.id;
-  document.getElementById('proj-nome-input').value='';
-  document.getElementById('provas-list').innerHTML='<div class="empty">Nenhuma prova ainda</div>';
-  document.getElementById('provas-count').textContent='0';
-  goStep('stepProjeto');
-}
-
-function editarProjeto(id){
-  curProjId=id;const p=getCurProj();if(!p)return;
-  document.getElementById('proj-nome-input').value=p.nome;
-  renderProvasList();goStep('stepProjeto');
-}
-
-function deletarProjeto(id){
-  if(!confirm('Excluir este projeto?'))return;
-  projetos=projetos.filter(p=>p.id!==id);salvarStorage();renderProjList();
-}
-
-function salvarProjeto(){
-  const p=getCurProj();if(!p)return;
-  p.nome=document.getElementById('proj-nome-input').value.trim()||'Projeto sem nome';
-  salvarStorage();goStep('stepHome');renderProjList();
-}
-
-function abrirProvaDeHome(projId,provaId){
-  curProjId=projId;curProvaId=provaId;
-  const v=getCurProva();if(!v)return;
-  preencherFormProva(v);goStep('stepProva');
-}
-
-function deletarProvaDeHome(projId,provaId){
-  const p=projetos.find(x=>x.id===projId);if(!p)return;
-  if(!confirm('Excluir esta prova?'))return;
-  p.provas=p.provas.filter(v=>v.id!==provaId);salvarStorage();renderProjList();
-}
-
-function irParaQuestoes(projId,provaId){
-  curProjId=projId;curProvaId=provaId;
-  const v=getCurProva();const p=getCurProj();if(!v||!p)return;
-  document.getElementById('q-proj-lbl').textContent=p.nome;
-  document.getElementById('q-prova-lbl').textContent=v.nome;
-  const list=document.getElementById('qlist');
-  list.innerHTML='';
-  if(v.qs.length){v.qs.forEach(q=>renderQCard(q,list));}
-  else list.innerHTML='<div class="empty">Nenhuma questão ainda</div>';
-  updCount();goStep('stepQ');
-}
-
-// ── PROJETO ──────────────────────────────────────────────────────
-function renderProvasList(){
-  const p=getCurProj();if(!p)return;
-  document.getElementById('provas-count').textContent=p.provas.length;
-  const list=document.getElementById('provas-list');
-  if(!p.provas.length){list.innerHTML='<div class="empty">Nenhuma prova ainda</div>';return;}
-  list.innerHTML=p.provas.map(v=>`
-    <div class="prova-row">
-      <span class="prova-row-nome">${v.nome||'Prova sem nome'}</span>
-      <span class="prova-row-meta">${v.serie||v.nivel||''} · ${v.qs.length} questão(ões)</span>
-      <button class="sec" style="padding:3px 9px;font-size:11px" onclick="editarProvaDir('${v.id}')">✎ Editar</button>
-      <button class="pri" style="padding:3px 9px;font-size:11px" onclick="irParaQuestoes('${curProjId}','${v.id}')">Questões →</button>
-      <button class="del" style="padding:3px 9px;font-size:11px" onclick="deletarProvaDir('${v.id}')">✕</button>
-    </div>`).join('');
-}
-
-function voltarParaProjeto(){
-  const p=getCurProj();if(!p)return;
-  document.getElementById('proj-nome-input').value=p.nome;
-  renderProvasList();goStep('stepProjeto');
-}
-
-function novaProva(){
-  const p=getCurProj();if(!p)return;
-  const v={id:'v'+Date.now(),nome:'',nivel:'',serie:'',dif:{mf:0,f:0,m:0,d:0,md:0},alts:0,formato:'',correta:'',instr:'',blocos:[],qs:[]};
-  p.provas.push(v);salvarStorage();curProvaId=v.id;
-  preencherFormProva(v);goStep('stepProva');
-}
-
-function editarProvaDir(provaId){curProvaId=provaId;const v=getCurProva();if(v){preencherFormProva(v);goStep('stepProva');}}
-function deletarProvaDir(provaId){
-  const p=getCurProj();if(!p)return;
-  if(!confirm('Excluir esta prova?'))return;
-  p.provas=p.provas.filter(v=>v.id!==provaId);salvarStorage();renderProvasList();
-}
-function voltarParaProvaEditar(){const v=getCurProva();if(v){preencherFormProva(v);goStep('stepProva');}}
-
-// ── PROVA: form ──────────────────────────────────────────────────
-function preencherFormProva(v){
-  document.getElementById('prova-proj-lbl').textContent=getCurProj()?.nome||'';
-  document.getElementById('prova-nome-lbl').textContent=v.nome||'Nova prova';
-  document.getElementById('v-nome').value=v.nome||'';
-  document.querySelectorAll('.nivel-etapas .pill').forEach(p=>p.classList.remove('sel'));
-  document.querySelectorAll('.nivel-series').forEach(s=>s.classList.add('hide'));
-  if(v.nivel){
-    const ek={'Fundamental Incompleto':'fund-inc','Fundamental Completo':'fund-comp','Ensino Médio':'medio','Ensino Superior':'superior'}[v.nivel];
-    if(ek){
-      document.querySelector(`.nivel-etapas .pill[data-etapa="${ek}"]`)?.classList.add('sel');
-      const sg=document.getElementById('series-'+ek);
-      if(sg){sg.classList.remove('hide');sg.querySelectorAll('.pill').forEach(p=>p.classList.remove('sel'));sg.querySelector(`.pill[data-serie="${v.serie}"]`)?.classList.add('sel');}
-    }
-  }
-  ['mf','f','m','d','md'].forEach(k=>document.getElementById('dif-'+k).value=v.dif?v.dif[k]||0:0);
-  calcDif();
-  document.getElementById('v-alts').value=v.alts||0;
-  document.getElementById('v-formato').value=v.formato||'';
-  document.getElementById('v-correta').value=v.correta||'';
-  document.getElementById('v-instr').value=v.instr||'';
-  document.getElementById('blocos-container').innerHTML='';
-  blocoCount=0;
-  document.getElementById('conteudos-raw').value='';
-  if(v.blocos&&v.blocos.length){v.blocos.forEach(b=>adicionarBloco(b.nome,b));document.getElementById('btn-add-wrap').style.display='block';}
-  else document.getElementById('btn-add-wrap').style.display='none';
-}
-
-document.querySelectorAll('.nivel-etapas .pill').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.nivel-etapas .pill').forEach(x=>x.classList.remove('sel'));
-    btn.classList.add('sel');
-    document.querySelectorAll('.nivel-series').forEach(s=>s.classList.add('hide'));
-    const sg=document.getElementById('series-'+btn.dataset.etapa);
-    if(sg){sg.classList.remove('hide');sg.querySelectorAll('.pill').forEach(x=>x.classList.remove('sel'));}
-  });
-});
-document.querySelectorAll('.nivel-series').forEach(grp=>{
-  grp.addEventListener('click',e=>{
-    const b=e.target.closest('.pill');if(!b)return;
-    grp.querySelectorAll('.pill').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
-  });
-});
-
-function calcDif(){
-  const t=['mf','f','m','d','md'].reduce((s,k)=>s+(parseInt(document.getElementById('dif-'+k).value)||0),0);
-  const el=document.getElementById('dif-total');
-  el.textContent='Total: '+t+'%'+(t===100?' ✓':'');
-  el.className='dif-total '+(t===100?'ok':t>0?'err':'');
-}
-
-// ── BLOCOS ───────────────────────────────────────────────────────
-const TIPOS_QUESTAO=[
-  {key:'objetiva-direta',label:'Objetiva direta'},
-  {key:'analise-assertivas',label:'Análise de assertivas'},
-  {key:'verdadeiro-falso',label:'Verdadeiro ou Falso'},
-  {key:'relacionar-colunas',label:'Relacionar colunas'},
-  {key:'preencher-lacunas',label:'Preencher lacunas'},
-  {key:'assercao-razao',label:'Asserção e razão'},
-  {key:'ordenacao',label:'Ordenação / Sequência'},
-  {key:'discursiva',label:'Discursiva'},
-];
-
-function distribuirConteudos(){
-  const raw=document.getElementById('conteudos-raw').value.trim();if(!raw)return;
-  const linhas=raw.split('\n').map(l=>l.trim()).filter(l=>l);
-  document.getElementById('blocos-container').innerHTML='';blocoCount=0;
-  linhas.forEach(nome=>adicionarBloco(nome));
-  document.getElementById('btn-add-wrap').style.display='block';
-}
-function adicionarBlocoManual(){adicionarBloco('');setTimeout(()=>{const bs=document.querySelectorAll('.bloco');bs[bs.length-1]?.scrollIntoView({behavior:'smooth',block:'center'});},100);}
-
-function adicionarBloco(nome,data){
-  blocoCount++;
-  const texto=data?.texto||'';
-  const tipos=data?.tipos||{};
-  const div=document.createElement('div');
-  div.className='bloco';
-  const tiposHTML=TIPOS_QUESTAO.map(t=>{
-    const qtd=tipos[t.key]||0;
-    const ativo=qtd>0;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid ${ativo?'#1D9E75':'rgba(0,0,0,0.10)'};border-radius:10px;background:${ativo?'#E1F5EE':'#F7F6F3'};margin-bottom:4px;" id="trow-${blocoCount}-${t.key}">
-      <input type="checkbox" style="width:16px;height:16px;accent-color:#1D9E75;cursor:pointer;flex-shrink:0;" class="tipo-check" ${ativo?'checked':''} onchange="toggleTipoBloco(this,'${blocoCount}','${t.key}')"/>
-      <span style="font-size:13px;font-weight:500;flex:1;color:#1A1A18;">${t.label}</span>
-      <input type="number" style="width:64px;text-align:center;padding:5px;font-size:13px;border:1px solid rgba(0,0,0,0.18);border-radius:8px;background:white;" min="0" max="50" value="${qtd}" ${ativo?'':'disabled'} placeholder="0"/>
-    </div>`;
-  }).join('');
-
-  div.innerHTML=`
-    <div class="bloco-hd">
-      <span class="bloco-num">Conteúdo ${blocoCount}</span>
-      <span style="font-size:13px;font-weight:500;flex:1">${nome||'Novo conteúdo'}</span>
-      <button class="del" style="padding:3px 8px;font-size:11px" onclick="this.closest('.bloco').remove();atualizarBlocoNums()">✕</button>
-    </div>
-    <div class="bloco-body">
-      <div class="row2" style="margin-bottom:.875rem">
-        <div class="field" style="margin-bottom:0"><label>Nome do conteúdo</label>
-          <input type="text" class="bloco-nome" value="${nome}" placeholder="Ex: Geometria Plana"
-            oninput="this.closest('.bloco').querySelector('.bloco-hd span:nth-child(2)').textContent=this.value||'Novo conteúdo'"/>
-        </div>
-        <div></div>
-      </div>
-      <div class="field"><label>Tipos e quantidade de questões</label>
-        <div class="tipos-qtd-grid">${tiposHTML}</div>
-      </div>
-      <div class="field"><label>Texto de contexto / enunciado (opcional)</label>
-        <textarea class="bloco-texto" style="min-height:64px" placeholder="Ex: Leia o trecho a seguir e responda...">${texto}</textarea>
-      </div>
-      <div class="field"><label>Imagem de contexto (opcional)</label>
-        <div class="img-area" onclick="this.querySelector('input').click()">
-          <p>Clique para adicionar imagem</p>
-          <input type="file" accept="image/*" onchange="previewImg(this)"/>
-        </div>
-      </div>
-    </div>`;
-  document.getElementById('blocos-container').appendChild(div);
-}
-
-function toggleTipoBloco(chk,blocoNum,tipoKey){
-  const rowId='trow-'+blocoNum+'-'+tipoKey;
-  const row=document.getElementById(rowId);
-  const inp=row?.querySelector('input[type=number]');
-  if(!row||!inp)return;
-  row.classList.toggle('active',chk.checked);
-  inp.disabled=!chk.checked;
-  if(!chk.checked)inp.value=0;
-}
-
-function atualizarBlocoNums(){document.querySelectorAll('.bloco').forEach((el,i)=>el.querySelector('.bloco-num').textContent='Conteúdo '+(i+1));}
-function previewImg(input){
-  if(!input.files[0])return;
-  const area=input.closest('.img-area');
-  const r=new FileReader();
-  r.onload=e=>{area.innerHTML=`<img src="${e.target.result}"/><p style="font-size:11px;color:var(--green)">Imagem adicionada ✓</p><input type="file" accept="image/*" onchange="previewImg(this)" style="display:none"/>`;area.classList.add('has-img');};
-  r.readAsDataURL(input.files[0]);
-}
-
-function salvarProva(){
-  const v=getCurProva();if(!v)return;
-  v.nome=document.getElementById('v-nome').value.trim()||'Prova sem nome';
-  document.getElementById('prova-nome-lbl').textContent=v.nome;
-  const etEl=document.querySelector('.nivel-etapas .pill.sel');
-  v.nivel={'fund-inc':'Fundamental Incompleto','fund-comp':'Fundamental Completo','medio':'Ensino Médio','superior':'Ensino Superior'}[etEl?.dataset.etapa]||'';
-  const serEl=document.querySelector('.nivel-series:not(.hide) .pill.sel');
-  v.serie=serEl?.dataset.serie||'';
-  ['mf','f','m','d','md'].forEach(k=>v.dif[k]=parseInt(document.getElementById('dif-'+k).value)||0);
-  v.alts=parseInt(document.getElementById('v-alts').value)||0;
-  v.formato=document.getElementById('v-formato').value;
-  v.correta=document.getElementById('v-correta').value;
-  v.instr=document.getElementById('v-instr').value.trim();
-  v.blocos=[];
-  document.querySelectorAll('.bloco').forEach(el=>{
-    const tipos={};
-    TIPOS_QUESTAO.forEach(t=>{
-      const row=el.querySelector(`[id$="-${t.key}"]`);
-      if(row){const chk=row.querySelector('.tipo-check');const inp=row.querySelector('input[type=number]');if(chk?.checked)tipos[t.key]=parseInt(inp?.value)||0;}
-    });
-    v.blocos.push({nome:el.querySelector('.bloco-nome')?.value||'',tipos,texto:el.querySelector('.bloco-texto')?.value||''});
-  });
-  salvarStorage();voltarParaProjeto();
-}
-
-// ── OPÇÕES PEDAGÓGICAS ───────────────────────────────────────────
-function togOpt(k){
-  togs[k]=!togs[k];
-  document.getElementById('tog-'+k).classList.toggle('on',togs[k]);
-  document.getElementById('xtra-'+k)?.classList.toggle('vis',togs[k]);
-}
-document.getElementById('qtipos').addEventListener('click',e=>{
-  const b=e.target.closest('.pill');if(!b)return;
-  document.querySelectorAll('#qtipos .pill').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
-});
-
-// ── PROMPT BUILDER ───────────────────────────────────────────────
-function buildPrompt(num,conteudo,tema,nivel,tipo,alts,formato,correta,dif,descCod,descTxt,bnccCod,usarBloom,usarGab){
-  const marcador=formato==='sem-marcador'?'sem qualquer marcador antes das alternativas (sem letras, números, hífens, bullets ou parênteses)':'com marcadores (A, B, C...)';
-  const fixarAlt=correta==='alternar'?'varie a posição da alternativa correta entre as questões':
-    correta==='primeira'?'a primeira alternativa é sempre a correta':
-    correta==='segunda'?'a segunda alternativa é sempre a correta':
-    correta==='terceira'?'a terceira alternativa é sempre a correta':
-    correta==='quarta'?'a quarta alternativa é sempre a correta':
-    correta==='quinta'?'a quinta alternativa é sempre a correta':'varie a posição da alternativa correta';
-
-  const tipoInstrucoes={
-    'objetiva-direta':`Questão objetiva direta com ${alts||5} alternativas, ${marcador}. ${fixarAlt}. Enunciado com 4 a 6 linhas. Inclua cálculo quando o conteúdo não for puramente teórico. Alternativas em frases curtas e plausíveis entre si.`,
-    'analise-assertivas':`Questão de análise de assertivas. Apresente as assertivas assim:\nI.Texto\nII.Texto\nIII.Texto\nIV.Texto\nApós as assertivas escreva apenas: "Está CORRETO o que se afirma em:"\nAs alternativas listam combinações das assertivas, ${marcador}. Nunca use todas verdadeiras ou todas falsas.`,
-    'verdadeiro-falso':`Questão verdadeiro ou falso. O enunciado termina com: "Analise as assertivas e classifique como verdadeira (V) ou falsa (F)."\nAssertivas no formato:\n()Texto\nApós as assertivas: "A sequência CORRETA, de cima para baixo, é:"\nAlternativas com sequências V/F variadas, sem marcador. Nunca todas V ou todas F.`,
-    'relacionar-colunas':`Questão de relacionar colunas. Apresente duas colunas com itens a serem associados. As alternativas mostram as combinações corretas e incorretas de forma plausível.`,
-    'preencher-lacunas':`Questão de preencher lacunas. O enunciado contém lacunas indicadas por ___. As alternativas oferecem diferentes conjuntos de palavras ou expressões para preencher as lacunas.`,
-    'assercao-razao':`Questão de asserção e razão. Apresente duas afirmações ligadas pela palavra PORQUE. As alternativas avaliam se as afirmações são verdadeiras e se a segunda é razão da primeira.`,
-    'ordenacao':`Questão de ordenação/sequência. Apresente itens a serem ordenados. As alternativas mostram diferentes sequências, sendo apenas uma correta.`,
-    'discursiva':`Questão discursiva. Enunciado claro que exige resposta desenvolvida. Inclua critérios de avaliação na defesa.`,
-  };
-
-  const instrTipo=tipoInstrucoes[tipo]||tipoInstrucoes['objetiva-direta'];
-
-  let instrPedagogicas='';
-  if(descCod||descTxt) instrPedagogicas+=`\n- Alinhe a questão ao descritor ${descCod||''}: "${descTxt||''}".`;
-  if(bnccCod) instrPedagogicas+=`\n- Alinhe a questão à habilidade BNCC ${bnccCod}.`;
-  else if(togs.bncc) instrPedagogicas+=`\n- Sugira e indique a habilidade BNCC mais adequada.`;
-  if(usarBloom) instrPedagogicas+=`\n- Na Defesa, identifique e justifique o nível da Taxonomia de Bloom desta questão.`;
-
-  const instrDefesa=usarGab?`\n\nDefesa: inclua resolução completa. Para questões teóricas: cite trecho real com referência. Para matemática: cálculos passo a passo. Ao final, inclua "Justificativa dos distratores" explicando por que cada alternativa incorreta é plausível mas errada.`:'';
-
-  return `Você é um especialista em elaboração de questões para concursos públicos, vestibulares, ENEM e avaliações institucionais no Brasil, seguindo rigorosamente os padrões das grandes bancas (CESPE, FCC, FGV, VUNESP, CEBRASPE).
-
-DADOS DA QUESTÃO:
-- Conteúdo: ${conteudo}
-- Tema específico: ${tema||conteudo}
-- Nível: ${nivel||'Ensino Médio'}
-- Dificuldade: ${dif||'Médio'}
-- Número da questão: ${num}
-
-TIPO E ESTRUTURA:
-${instrTipo}
-
-REGRAS OBRIGATÓRIAS:
-- A primeira linha da questão deve conter apenas o nome do conteúdo
-- O número da questão deve ser seguido de ponto (ex: ${num}.)
-- Enunciado com 4 a 6 linhas, completo, claro e variado
-- Não comece o enunciado sempre com as mesmas palavras — varie entre situações cotidianas, profissionais, institucionais e dados/tabelas
-- Os distratores (alternativas incorretas) devem ser plausíveis, coerentes com o tema, indicando erros comuns — nunca óbvios ou facilmente eliminados
-- Não use termos absolutistas nas alternativas (nunca, sempre, todos, nenhum)
-- As alternativas devem ter tamanho semelhante entre si
-- A questão deve exigir interpretação e conhecimento, não apenas memorização
-- Use apenas informações corretas, com fundamentação real e fontes oficiais quando aplicável
-- Padrões numéricos: vírgula para decimais (3,7), ponto para milhar (1.250), * para multiplicação, / para frações, x² para expoentes
-- Não deixe a resposta correta evidente no enunciado${instrPedagogicas}${instrDefesa}
-
-REVISÃO AUTOMÁTICA antes de entregar:
-Verifique: enunciado completo sem repetição de início/fechamento, distratores não óbvios, ausência de termos absolutistas, alternativas de tamanho semelhante, resposta não evidente no enunciado, informações corretas com referências reais. Se qualquer regra falhar, reescreva antes de entregar.
-
-Entregue apenas a questão formatada, sem introduções ou comentários.`;
-}
-
-function buildPromptDiagnostico(qTxt){
-  return `Você é um especialista em análise de questões para concursos públicos, com foco em risco de recurso. Analise a questão abaixo de forma objetiva e técnica.
-
-QUESTÃO:
-${qTxt}
-
-Responda EXATAMENTE nesta estrutura:
-
-Resumo da questão
-[uma linha descrevendo o que a questão avalia]
-
-Problemas identificados
-[escrita, lógica, cálculo ou estrutura — liste cada problema ou escreva "Nenhum"]
-
-Problemas conceituais ou matemáticos
-[se houver — ou escreva "Nenhum"]
-
-Qualidade dos distratores
-[avalie se as alternativas incorretas são plausíveis e não facilmente eliminadas]
-
-Avaliação de possibilidade de recurso
-[classifique como: INEXISTENTE / LEVE / MODERADO / GRAVE — e explique brevemente]
-
-Sugestão de correção
-[apenas se necessário — ou escreva "Não necessário"]`;
-}
-
-function buildPromptCorrecao(qTxt,diagTxt){
-  return `Você é um especialista em elaboração de questões para concursos públicos. Com base no diagnóstico abaixo, reescreva a questão corrigindo todos os problemas identificados. Mantenha o mesmo tema, tipo e nível de dificuldade. Siga rigorosamente os padrões de qualidade de grandes bancas (CESPE, FCC, FGV, VUNESP).
-
-DIAGNÓSTICO:
-${diagTxt||'Reescreva melhorando qualidade geral, distratores e clareza do enunciado.'}
-
-QUESTÃO ORIGINAL:
-${qTxt}
-
-Entregue apenas a questão reescrita, sem comentários.`;
-}
-
-// ── API ──────────────────────────────────────────────────────────
-async function chamarAPI(prompt,streamEl){
-  try{
-    if(streamEl){streamEl.textContent='Gerando...';streamEl.classList.add('cur');}
-    const res=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||'Erro '+res.status);}
-    const data=await res.json();
-    const txt=(data.content||[]).map(b=>b.text||'').join('');
-    if(streamEl){streamEl.textContent=txt;streamEl.classList.remove('cur');}
-    return txt;
-  }catch(err){
-    if(streamEl){streamEl.textContent='Erro: '+err.message;streamEl.classList.remove('cur');}
-    return null;
-  }
-}
-
-// ── GERAR QUESTÃO MANUAL ─────────────────────────────────────────
-async function gerarQManual(){
-  const tema=document.getElementById('qtema').value.trim();if(!tema){document.getElementById('qtema').focus();return;}
-  const disc=document.getElementById('qdisc').value;if(!disc){document.getElementById('qdisc').focus();return;}
-  const dif=document.getElementById('qdif').value;
-  const tipoEl=document.querySelector('#qtipos .pill.sel');
-  const tipo=tipoEl?tipoEl.dataset.t:'objetiva-direta';
-  const v=getCurProva();
-  const num=(v?.qs.length||0)+1;
-  const id='q'+Date.now();
-  const btn=document.getElementById('btn-gerar');
-  btn.disabled=true;btn.innerHTML='<div class="spin"></div> Gerando...';
-
-  const descCod=togs.desc?document.getElementById('q-desc-cod').value.trim():'';
-  const descTxt=togs.desc?document.getElementById('q-desc-txt').value.trim():'';
-  const bnccCod=togs.bncc?document.getElementById('qbncc').value.trim():'';
-
-  const prompt=buildPrompt(num,disc,tema,v?.serie||v?.nivel||'Ensino Médio',tipo,v?.alts||5,v?.formato||'sem-marcador',v?.correta||'primeira',dif||'Médio',descCod,descTxt,bnccCod,togs.bloom,togs.gab);
-
-  const list=document.getElementById('qlist');
-  if(list.querySelector('.empty'))list.innerHTML='';
-
-  const qObj={id,num,disc,tema,tipo,dif:dif||'Médio',descCod,descTxt,bnccCod,bloom:togs.bloom,txt:'',status:'pendente',diagTxt:''};
-  list.insertAdjacentHTML('beforeend',`<div class="qcard" id="c${id}"><div class="qhead"><span class="qnum">Q${num}</span><span class="qtitle">${disc} — ${tema}</span></div><div class="qbody cur" id="b${id}"></div></div>`);
-
-  const bodyEl=document.getElementById('b'+id);
-  const txt=await chamarAPI(prompt,bodyEl);
-  if(txt){
-    qObj.txt=txt;
-    if(v)v.qs.push(qObj);
-    salvarStorage();
-    document.getElementById('c'+id).outerHTML=buildQCardHTML(qObj);
-    updCount();
-  }
-  btn.disabled=false;btn.innerHTML='✦ Gerar questão';
-  document.getElementById('qtema').value='';
-}
-
-// ── CARD QUESTÃO ─────────────────────────────────────────────────
-function buildQCardHTML(q){
-  const apr=q.status==='aprovada';
-  const badges=[q.dif,q.tipo,q.descCod,q.bnccCod].filter(Boolean).map(b=>`<span class="badge">${b}</span>`).join('');
-  return `<div class="qcard${apr?' aprovada':''}" id="c${q.id}">
-    <div class="qhead">
-      <span class="qnum">Q${q.num}</span>
-      <span class="qtitle">${q.disc||''} — ${q.tema||''}</span>
-      ${badges}
-      ${apr?'<span class="badge apr">✓ Aprovada</span>':''}
-    </div>
-    <div class="qbody" id="b${q.id}">${q.txt||''}</div>
-    <div class="qactions">
-      <button onclick="editarQ('${q.id}')">✎ Editar</button>
-      <button class="info" onclick="diagnosticarQ('${q.id}')">◎ Diagnóstico</button>
-      <button class="warn" onclick="corrigirQ('${q.id}')">↻ Corrigir</button>
-      <button class="ok" onclick="aprovarQ('${q.id}')">${apr?'✓ Aprovada':'✔ Aprovar'}</button>
-      <button class="del" onclick="delQ('${q.id}')">✕ Excluir</button>
-    </div>
-    <div class="diag-panel" id="diag-${q.id}">${q.diagTxt||''}</div>
-  </div>`;
-}
-
-function renderQCard(q,container){container.insertAdjacentHTML('beforeend',buildQCardHTML(q));}
-
-// ── AÇÕES QUESTÃO ────────────────────────────────────────────────
-function editarQ(id){
-  const v=getCurProva();const q=v?.qs.find(x=>x.id===id);if(!q)return;
-  const bodyEl=document.getElementById('b'+id);
-  if(bodyEl.querySelector('textarea')){
-    q.txt=bodyEl.querySelector('textarea').value;salvarStorage();
-    bodyEl.innerHTML=q.txt;bodyEl.style.whiteSpace='pre-wrap';
-  } else {
-    bodyEl.innerHTML=`<textarea>${q.txt||''}</textarea>`;bodyEl.style.whiteSpace='normal';
-  }
-}
-
-async function diagnosticarQ(id){
-  const v=getCurProva();const q=v?.qs.find(x=>x.id===id);if(!q)return;
-  const panel=document.getElementById('diag-'+id);
-  panel.classList.add('vis');panel.textContent='Analisando questão...';
-  const txt=await chamarAPI(buildPromptDiagnostico(q.txt),null);
-  if(txt){q.diagTxt=txt;salvarStorage();panel.textContent=txt;}
-  else panel.textContent='Erro ao gerar diagnóstico.';
-}
-
-async function corrigirQ(id){
-  const v=getCurProva();const q=v?.qs.find(x=>x.id===id);if(!q)return;
-  const bodyEl=document.getElementById('b'+id);
-  bodyEl.classList.add('cur');bodyEl.textContent='Reescrevendo questão...';
-  const txt=await chamarAPI(buildPromptCorrecao(q.txt,q.diagTxt),null);
-  if(txt){q.txt=txt;salvarStorage();bodyEl.textContent=txt;bodyEl.classList.remove('cur');}
-}
-
-function aprovarQ(id){
-  const v=getCurProva();const q=v?.qs.find(x=>x.id===id);if(!q)return;
-  q.status=q.status==='aprovada'?'pendente':'aprovada';
-  salvarStorage();document.getElementById('c'+id).outerHTML=buildQCardHTML(q);
-}
-
-function delQ(id){
-  const v=getCurProva();
-  if(v){v.qs=v.qs.filter(q=>q.id!==id);v.qs.forEach((q,i)=>q.num=i+1);salvarStorage();}
-  document.getElementById('c'+id)?.remove();updCount();
-  if(!document.querySelectorAll('#qlist .qcard').length)document.getElementById('qlist').innerHTML='<div class="empty">Nenhuma questão ainda</div>';
-}
-
-function updCount(){
-  const n=document.querySelectorAll('#qlist .qcard').length;
-  document.getElementById('qcount').textContent=n;
-  ['btn-export-docx','btn-export-pdf','btn-export-drive','btn-resumo'].forEach(id=>document.getElementById(id).disabled=n===0);
-}
-
-// ── GERAR TUDO ───────────────────────────────────────────────────
-async function gerarTudo(){
-  const btn=document.getElementById('btn-gt');
-  const prog=document.getElementById('gt-progress');
-  const bar=document.getElementById('gt-bar');
-  const status=document.getElementById('gt-status');
-  btn.disabled=true;prog.style.display='block';
-
-  const tarefas=[];
-  for(const p of projetos){
-    for(const v of p.provas){
-      const totalQ=v.blocos.reduce((s,b)=>{
-        const leg=(!b.tipos)?b.qtd||0:0;
-        return s+Object.values(b.tipos||{}).reduce((ss,n)=>ss+(n||0),0)+leg;
-      },0);
-      for(const b of v.blocos){
-        if(b.tipos&&Object.keys(b.tipos).length){
-          for(const[tipo,qtd] of Object.entries(b.tipos)){
-            for(let i=0;i<(qtd||0);i++) tarefas.push({proj:p,prova:v,bloco:b,tipo,idx:i,totalQ});
-          }
-        } else if(b.qtd>0){
-          const tipoLeg=b.tipo==='discursiva'?'discursiva':'objetiva-direta';
-          for(let i=0;i<b.qtd;i++) tarefas.push({proj:p,prova:v,bloco:b,tipo:tipoLeg,idx:i,totalQ});
-        }
-      }
-    }
-  }
-
-  if(!tarefas.length){status.textContent='Nenhum conteúdo com quantidade definida encontrado. Configure as provas e defina as quantidades por tipo.';btn.disabled=false;prog.style.display='none';return;}
-
-  let done=0;
-  for(const t of tarefas){
-    const{prova:v,bloco:b,tipo,idx,proj:p,totalQ}=t;
-    const num=v.qs.length+1;
-    const nivel=v.serie||v.nivel||'Ensino Médio';
-    const dif=escolherDif(v.dif,num,totalQ);
-    const prompt=buildPrompt(num,b.nome,b.nome,nivel,tipo,v.alts||5,v.formato||'sem-marcador',v.correta||'primeira',dif,'','','',false,true)+(b.texto?`\n\nContexto do conteúdo: "${b.texto}"`:'');
-    status.textContent=`Gerando: ${p.nome} › ${v.nome} › ${b.nome} (${tipo}, questão ${idx+1})`;
-    const txt=await chamarAPI(prompt,null);
-    if(txt){v.qs.push({id:'q'+Date.now(),num,disc:b.nome,tema:b.nome,tipo,dif,bloom:false,bncc:false,txt,status:'pendente',diagTxt:''});salvarStorage();}
-    done++;bar.style.width=Math.round(done/tarefas.length*100)+'%';
-    await new Promise(r=>setTimeout(r,200));
-  }
-
-  status.textContent=`✓ Concluído! ${done} questão(ões) gerada(s). Veja os resultados abaixo.`;
-  btn.disabled=false;renderProjList();renderResultados();
-  setTimeout(()=>document.getElementById('resultados-section')?.scrollIntoView({behavior:'smooth',block:'start'}),300);
-}
-
-function escolherDif(dif,qNum,total){
-  const ns=[{l:'Muito Fácil',p:dif?.mf||0},{l:'Fácil',p:dif?.f||0},{l:'Médio',p:dif?.m||0},{l:'Difícil',p:dif?.d||0},{l:'Muito Difícil',p:dif?.md||0}];
-  if(ns.every(n=>n.p===0))return'Médio';
-  const pos=total>0?((qNum-1)/total)*100:0;
-  let acc=0;for(const n of ns){acc+=n.p;if(pos<acc)return n.l;}return'Médio';
-}
-
-// ── RESULTADOS ───────────────────────────────────────────────────
-function toggleResProjBody(bodyId,hdEl){
-  const el=document.getElementById(bodyId);if(!el)return;
-  const open=el.style.display!=='none'&&el.style.display!=='';
-  el.style.display=open?'none':'block';
-}
-
-function renderResultados(){
-  const sec=document.getElementById('resultados-section');
-  const lista=document.getElementById('resultados-lista');
-  const temQs=projetos.some(p=>p.provas.some(v=>v.qs.length>0));
-  if(!temQs){sec.style.display='none';return;}
-  sec.style.display='block';
-  lista.innerHTML=projetos.filter(p=>p.provas.some(v=>v.qs.length>0)).map(p=>`
-    <div class="res-proj-card">
-      <div class="res-proj-hd" onclick="toggleResProjBody('rb-${p.id}',this)">
-        <span class="res-proj-nome">${p.nome||'Projeto sem nome'}</span>
-        <span style="font-size:12px;color:var(--gd)">${p.provas.reduce((s,v)=>s+v.qs.length,0)} questão(ões)</span>
-        <span style="font-size:16px;color:var(--gd);margin-left:4px">⌄</span>
-      </div>
-      <div class="res-proj-body" id="rb-${p.id}" style="display:block">
-        ${p.provas.filter(v=>v.qs.length>0).map(v=>`
-          <div class="res-prova-block">
-            <div class="res-prova-nome">
-              <span>${v.nome||'Prova sem nome'} <span style="font-size:11px;color:var(--mut);font-weight:400">${v.serie||v.nivel||''}</span></span>
-              <button class="sec" style="font-size:11px;padding:3px 9px" onclick="irParaQuestoes('${p.id}','${v.id}')">Abrir questões →</button>
-            </div>
-            ${v.qs.map((q,i)=>`
-              <div style="padding:8px 0;border-bottom:${i<v.qs.length-1?'1px solid var(--bdr)':'none'}">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-                  <span class="qnum">Q${q.num}</span>
-                  <span style="font-size:13px;font-weight:500;flex:1">${q.tema||''}</span>
-                  <span class="badge">${q.tipo||''}</span>
-                  <span class="badge">${q.dif||''}</span>
-                  ${q.status==='aprovada'?'<span class="badge apr">✓ Aprovada</span>':''}
-                </div>
-                <p style="font-size:12px;color:var(--mut);line-height:1.6;white-space:pre-wrap;max-height:80px;overflow:hidden">${(q.txt||'').substring(0,280)}${(q.txt||'').length>280?'…':''}</p>
-              </div>`).join('')}
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
-}
-
-function limparResultados(){document.getElementById('resultados-section').style.display='none';}
-
-// ── EXPORTAÇÃO ───────────────────────────────────────────────────
-function montarTextoProva(){
-  const v=getCurProva();if(!v)return'';
-  const linhas=[
-    v.nome.toUpperCase(),
-    v.serie||v.nivel||'',
-    v.instr?'\n'+v.instr:'',
-    '\nNome: _________________________________   Turma: ________   Data: ___/___/______   Nota: _______\n',
-    ...v.qs.map(q=>'\n'+q.txt)
-  ];
-  return linhas.join('\n');
-}
-
-function exportarDocx(){
-  alert('Exportação DOCX será integrada após o deploy. Por enquanto use "Copiar tudo" e cole no Word.');
-}
-
-function exportarPdf(){
-  const v=getCurProva();if(!v)return;
-  const txt=montarTextoProva();
-  const win=window.open('','_blank');
-  win.document.write(`<html><head><title>${v.nome}</title><style>body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;margin:2cm;white-space:pre-wrap;}@media print{body{margin:1.5cm;}}</style></head><body>${txt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</body></html>`);
-  win.document.close();win.print();
-}
-
-function exportarDrive(){
-  alert('Integração com Google Drive será configurada após o deploy. Necessita autenticação OAuth.');
-}
-
-// ── RESUMO ───────────────────────────────────────────────────────
-function toResumo(){renderResumo();goStep('stepResumo');}
-function renderResumo(){
-  const v=getCurProva();if(!v)return;
-  document.getElementById('r-header').innerHTML=`
-    <p class="stitle">Dados da prova</p>
-    <table class="rtable">
-      <tr><td style="color:var(--mut);width:130px">Projeto</td><td>${getCurProj()?.nome||''}</td></tr>
-      <tr><td style="color:var(--mut)">Prova</td><td><strong>${v.nome}</strong></td></tr>
-      <tr><td style="color:var(--mut)">Nível</td><td>${v.serie||v.nivel||'—'}</td></tr>
-      ${v.instr?`<tr><td style="color:var(--mut)">Instruções</td><td>${v.instr}</td></tr>`:''}
-      <tr><td style="color:var(--mut)">Total</td><td><strong>${v.qs.length} questão(ões)</strong> · ${v.qs.filter(q=>q.status==='aprovada').length} aprovadas</td></tr>
-    </table>`;
-  document.getElementById('r-questoes').innerHTML=`
-    <p class="stitle">Lista de questões</p>
-    <table class="rtable">
-      <thead><tr><th>#</th><th>Conteúdo</th><th>Tipo</th><th>Dif.</th><th>Descritor</th><th>BNCC</th><th>Status</th></tr></thead>
-      <tbody>${v.qs.map(q=>`<tr>
-        <td><span class="qnum">Q${q.num}</span></td>
-        <td>${q.tema}</td><td style="font-size:11px">${q.tipo}</td>
-        <td>${q.dif}</td>
-        <td style="font-size:11px">${q.descCod||'<span style="color:var(--hnt)">—</span>'}</td>
-        <td style="font-size:11px">${q.bnccCod||'<span style="color:var(--hnt)">—</span>'}</td>
-        <td>${q.status==='aprovada'?'<span style="color:var(--gd)">✓ Aprovada</span>':'<span style="color:var(--hnt)">Pendente</span>'}</td>
-      </tr>`).join('')}</tbody>
-    </table>`;
-}
-
-// ── INIT ─────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded',()=>{
-  goStep('stepHome');
-  renderProjList();
-  setTimeout(renderResultados,100);
-  calcDif();
-});
-</script>
-</body>
-</html>
+Visual Studio Code 1.122
+
+Show release notes after an update
+
+Follow us on LinkedIn, X, Bluesky | View online
+
+Release date: May 28, 2026
+
+Update 1.122.1: The update addresses these issues.
+
+Welcome to the 1.122 release of Visual Studio Code. This release further enhances the agent experience and makes BYOK more flexible, while adding new capabilities for testing web apps across different devices.
+
+Larger context windows: Support for 1M context windows for Anthropic and OpenAI models.
+
+Air-gapped BYOK: Use your own language models, even when you're not connected.
+
+Browser device emulation: Test your website's responsiveness across different devices directly in the integrated browser.
+
+Rich issue reporting: Create rich VS Code issue reports, including screenshots and video recordings.
+
+Happy Coding!
+
+VS Code is rolling out gradually to all users. Use Check for Updates in VS Code to get the latest version immediately.
+
+To try new features as soon as possible, download the nightly Insiders build, which includes the latest updates as soon as they are available.
+
+In this update
+GitHub Copilot moves to usage-based billing
+Agents
+Language Models
+Integrated browser
+Editor Experience
+Deprecated features and settings
+Notable fixes
+Thank you
+GitHub Copilot moves to usage based billing
+GitHub Copilot has moved to usage-based billing.
+
+Under the new model, each interaction consumes AI credits, which are calculated based on token (input, output, and cached) cost and on the model used. Complex interactions and more capable models consume more credits, while lightweight models and simpler tasks use fewer. Learn more about how you can optimize your usage.
+
+Updated Copilot status dashboard
+The Copilot status dashboard now reflects usage-based billing. You can view your AI credits consumption, so you can monitor your usage at a glance.
+
+Screenshot showing the Copilot status dashboard
+
+Model costs in the model picker
+The model picker now displays cost information to help you make informed model choices. Different models have different costs per token type, so choosing the right model for your task can help extend your usage.
+
+Screenshot showing the model picker with cost information
+
+You can view all available models, their capabilities, context sizes, and billing details in the Language Models editor. Open it from the model picker by selecting ⚙️, or run the Chat: Manage Language Models command from the Command Palette.
+
+Agents
+Agents Window (Preview)
+The Agents window is a dedicated companion window optimized for exploring, iterating on, and reviewing agent sessions across projects, harnesses, and machines. We keep improving it and the updates for this release include:
+
+Session hover details: Hover over a session in the session list to see its details at a glance. The hover shows the session title with an icon indicating the harness used, along with the project, worktree, and files changed.
+
+Local VS Code harness (Insiders only): We're continuing to iterate on the ability to use the local harness in the Agents window, such as improvements to the custom agent picker. The availability of the local harness is an early, experimental feature available only in VS Code Insiders. To try it out, you can enable the sessions.chat.localAgent.enabled setting in Insiders.
+
+Screenshot showing the Agents window with a hover over a session in the list
+
+You can open the Agents window in several ways, including the Open in Agents button in the VS Code title bar. To learn more about how it works and what you can do with it, visit the Agents window documentation. You can also check out our new VS Code Insiders podcast episode about how the Agents window fits into agent-first development workflows.
+
+Your feedback continues to be a great help in shaping Agents. If you've already been using it and providing feedback, thank you! Please continue to file issues on GitHub or browse existing issues.
+
+Richer OpenTelemetry signals for agents
+Local agent sessions now emit a canonical github.copilot.* attribute namespace to OpenTelemetry, matching the GitHub Copilot CLI OpenTelemetry conventions. New signals add repository context, agent type, structured tool parameters, and hook outcomes to each session.
+
+For the full attribute reference, see Monitor agent usage with OpenTelemetry.
+
+Sandboxing
+Setting:   chat.agent.sandbox.enabled
+
+Previously, when you ran commands with Bypass Approvals or Autopilot mode, they were first attempted in the sandbox. If the command failed with a non-zero exit code, it was automatically retried outside the sandbox. Since approvals were bypassed anyway, this did not provide a meaningful safety benefit and could make the behavior harder to reason about.
+
+Based on feedback from Insiders users, terminal sandboxing now only applies when you use Default Approvals, where it provides a clearer balance between safety and usefulness.
+
+Language Models
+1M context window for Anthropic and OpenAI models
+VS Code now supports 1 million token context windows for compatible Anthropic and OpenAI models. This expanded context window enables you to work with significantly larger codebases and longer conversations without losing important context. The expanded context window is available when using supported models, such as Claude Opus 4.7 and GPT-5.5.
+
+Screenshot showing extended context size options.
+
+Note: Larger context windows may consume more tokens per interaction, which increases AI credits usage under usage-based billing.
+
+Use BYOK without a GitHub sign in
+Previously, using your own language model API key in VS Code required signing in to GitHub. Now, Bring Your Own Key (BYOK) works without signing in, so you can use chat, tools, and MCP servers in air-gapped or restricted environments where GitHub sign-in isn't possible. This also enables fully offline workflows with local models like Ollama.
+
+To get started, run Manage Language Models from the Command Palette and add a provider such as Anthropic, Azure, Gemini, OpenAI, Ollama, OpenRouter, or a custom endpoint. Once at least one BYOK model is configured, the Chat view becomes available and sign-in prompts are suppressed.
+
+Built-in tools and any configured MCP servers continue to work. Requests go directly to your provider.
+
+Note: Inline suggestions and next edit suggestions (NES) still require a GitHub sign-in. BYOK powers chat, tools, and MCP servers only.
+
+Utility model notification
+Settings:   chat.utilityModel ,   chat.utilitySmallModel
+
+A few flows in VS Code, such as chat title generation, commit message generation, and feedback, use a smaller utility model that normally comes from your Copilot subscription. When you use BYOK while signed out, the default utility models are unreachable, so a notification in the chat input prompts you to point them at one of your BYOK models.
+
+You have two options:
+
+Select Configure to open settings and pick a BYOK model for   chat.utilityModel and   chat.utilitySmallModel . This unlocks the full set of AI features using your own language model.
+
+Dismiss the notification if you only need to use chat. The utility-driven features remain inactive until you configure a model.
+
+The notification hides automatically once you configure both utility settings, sign in to GitHub, or remove all BYOK models.
+
+Custom Endpoint provider in Stable
+The Custom Endpoint provider lets you connect models that implement Chat Completions, Responses, or Messages APIs, so you can use chat with your own endpoint and API key. You can use it to connect to self-hosted, enterprise, or other compatible AI endpoints.
+
+The Custom Endpoint provider is now available in VS Code Stable.
+
+To learn how to set it up, see Add a custom endpoint model.
+
+Manage models in Agents window
+You can now run the command Chat: Manage Language Models directly from the Agents window to configure the language models you want to use while working there.
+
+To use BYOK models, you must use the Local agent provider which is enabled in VS Code Insiders with sessions.chat.localAgent.enabled. Model configuration is shared with the editor window, so changes you make in either place are reflected in both.
+
+Granular BYOK provider group actions in Manage Language Models
+Managing BYOK providers often means making small updates, such as rotating an API key or renaming a provider group without opening and editing the full JSON configuration by hand.
+
+In the Language Model editor, supported provider groups now expose targeted actions based on the provider schema: Update API Key, Add Model, Rename Group, and Delete. This makes common provider maintenance tasks faster while keeping you in the same flow.
+
+Remote Development
+The Remote Development extensions, allow you to use a Dev Container, remote machine via SSH or Remote Tunnels, or the Windows Subsystem for Linux (WSL) as a full-featured development environment.
+
+Highlights include:
+
+EOL for 32-bit ARM Linux hosts
+You can learn more about these features in the Remote Development release notes.
+
+Integrated browser
+Emulate devices
+The integrated browser now includes out-of-the-box support for device emulation including screen sizes, mobile / touch emulation, custom user-agents, and more. This is especially useful for web development and debugging, allowing you to quickly test your website's responsiveness and behavior across different devices directly from VS Code without needing to switch to a separate browser or use external tools.
+
+To get started from a browser tab, select the Show Emulation Toolbar command from the overflow menu.
+
+
+Agents can also trigger device emulation via Playwright code, for example to catch mobile responsiveness issues:
+
+
+Add browser screenshot as chat context
+The new Add Screenshot to Chat feature lets you attach a screenshot of the current browser viewport to the chat as context. This is especially useful for UI-related tasks, such as debugging a layout issue.
+
+
+Editor Experience
+Improved issue reporting flow
+Setting:   issueReporter.wizard.enabled
+
+To help us better understand and fix any problems you might run into in VS Code, we've improved the issue reporting flow with a new issue reporting wizard. The wizard guides you through creating high quality issues directly from VS Code, including adding relevant details, screenshots, and video recordings.
+
+Enable the   issueReporter.wizard.enabled setting to opt in to the new issue reporter.
+
+
+Deprecated features and settings
+New deprecations in this release
+Upcoming deprecations
+Notable fixes
+Thank you
+Contributions to our issue tracking:
+
+@gjsjohnmurray (John Murray)
+@RedCMD (RedCMD)
+@IllusionMH (Andrii Dieiev)
+@albertosantini (Alberto Santini)
+Contributions to vscode:
+
+@aaronpowell (Aaron Powell): Add marketplace ref support for plugin marketplaces PR #317901
+@dgercho (David Gerschcovsky): Enable to filter search within changed files of source tree PR #314790
+@oded-ist (Oded S): Fix read_cell_output incorrectly reporting all outputs as too large PR #318148
+@PenguinDOOM (Penguin): Fix BYOK invalid stateful marker retries PR #317292
+@SLdragon (rentu): feat: add languageDiagnosticsService option for nes/inline completion provider PR #317678
+We really appreciate people trying our new features as soon as they are ready, so check back here often and learn what's new.
+
+If you'd like to read release notes for previous VS Code versions, go to Updates on code.visualstudio.com.
+
