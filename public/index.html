@@ -695,10 +695,10 @@ function adicionarBloco(nome,data){
   const tiposHTML=TIPOS_QUESTAO.map(t=>{
     const qtd=tipos[t.key]||0;
     const ativo=qtd>0;
-    return `<div class="tipo-qtd-row${ativo?' active':''}" id="trow-${blocoCount}-${t.key}">
-      <input type="checkbox" class="tipo-check" ${ativo?'checked':''} onchange="toggleTipoBloco(this,'${blocoCount}','${t.key}')"/>
-      <span class="tipo-nome">${t.label}</span>
-      <input type="number" class="tipo-num" min="0" max="50" value="${qtd}" ${ativo?'':'disabled'} placeholder="0"/>
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid ${ativo?'#1D9E75':'rgba(0,0,0,0.10)'};border-radius:10px;background:${ativo?'#E1F5EE':'#F7F6F3'};margin-bottom:4px;" id="trow-${blocoCount}-${t.key}">
+      <input type="checkbox" style="width:16px;height:16px;accent-color:#1D9E75;cursor:pointer;flex-shrink:0;" class="tipo-check" ${ativo?'checked':''} onchange="toggleTipoBloco(this,'${blocoCount}','${t.key}')"/>
+      <span style="font-size:13px;font-weight:500;flex:1;color:#1A1A18;">${t.label}</span>
+      <input type="number" style="width:64px;text-align:center;padding:5px;font-size:13px;border:1px solid rgba(0,0,0,0.18);border-radius:8px;background:white;" min="0" max="50" value="${qtd}" ${ativo?'':'disabled'} placeholder="0"/>
     </div>`;
   }).join('');
 
